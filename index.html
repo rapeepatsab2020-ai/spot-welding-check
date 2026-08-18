@@ -60,6 +60,36 @@
   .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
   .badge.ok{background:#eafaf1;color:var(--ok);}
   .badge.draft{background:#fff6e0;color:var(--warn);}
+
+  /* ---- Config Editor (structured, no raw JSON) ---- */
+  .cfg-mini-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin:2px 0 8px;}
+  .cfg-block{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px;background:#fbfcfd;}
+  .cfg-block-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;}
+  .cfg-block-head input.gun-name{font-weight:700;color:var(--navy);font-size:14px;border:1px solid transparent;background:transparent;padding:5px 8px;border-radius:6px;width:auto;flex:1;max-width:280px;}
+  .cfg-block-head input.gun-name:hover{border-color:var(--line);}
+  .cfg-block-head input.gun-name:focus{border-color:var(--navy2);background:#fff;}
+  .icon-btn{border:1px solid var(--line);background:#fff;color:var(--muted);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;}
+  .icon-btn:hover{border-color:var(--fail);color:var(--fail);background:#fdecea;}
+  .icon-btn.add{border-color:var(--navy2);color:var(--navy2);width:auto;padding:7px 14px;font-weight:700;font-size:12.5px;}
+  .icon-btn.add:hover{background:var(--navy2);color:#fff;}
+  .std-table-wrap{overflow-x:auto;border-radius:8px;}
+  table.std-table{margin-top:0;}
+  .std-table th{font-size:11px;white-space:nowrap;}
+  .std-table input{border:1px solid var(--line);border-radius:6px;padding:6px 7px;font-size:12.5px;text-align:center;width:100%;background:#fff;}
+  .std-table input.label-input{text-align:left;font-weight:600;}
+  .std-table td{padding:5px;}
+  .tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;min-height:26px;}
+  .tag-chip{display:inline-flex;align-items:center;gap:5px;background:#eef2f8;color:var(--navy2);padding:5px 6px 5px 12px;border-radius:20px;font-size:12.5px;font-weight:700;}
+  .tag-chip button{border:none;background:transparent;color:var(--navy2);cursor:pointer;font-size:13px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;}
+  .tag-chip button:hover{background:var(--navy2);color:#fff;}
+  .tag-add{display:flex;gap:6px;margin-top:8px;max-width:260px;}
+  .tag-add input{flex:1;}
+  .tag-add button{white-space:nowrap;padding:8px 12px;font-size:12.5px;background:#fff;color:var(--navy);border:1px solid var(--line);}
+  #cfgEditor{margin-bottom:4px;}
+  details.cfg-advanced{margin-top:14px;}
+  details.cfg-advanced summary{cursor:pointer;font-size:12px;color:var(--muted);font-weight:700;user-select:none;}
+  details.cfg-advanced summary:hover{color:var(--navy2);}
+  #s_config_preview{width:100%;font-family:'SF Mono',Menlo,monospace;font-size:11.5px;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--navy);color:#cfe0f2;margin-top:8px;max-height:320px;overflow:auto;white-space:pre;}
 </style>
 </head>
 <body>
@@ -159,9 +189,14 @@
       <div><label>Issue Form Date</label><input id="s_issuedate" type="date"></div>
     </div>
 
-    <div class="sect-title">Config (JSON)</div>
-    <div class="hint" style="margin-bottom:6px">แก้ตัวเลข/label ตามเครื่องจริงได้เลย ระบบจะเช็ค JSON ให้ก่อนบันทึก ถ้าพิมพ์ผิดจะแจ้งเตือนไม่ให้บันทึก</div>
-    <textarea id="s_config" rows="14" style="width:100%;font-family:'SF Mono',Menlo,monospace;font-size:12.5px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#fbfcfd;"></textarea>
+    <div class="sect-title">ตั้งค่าเครื่องจักร (Config)</div>
+    <div class="hint" style="margin-bottom:10px">กรอกผ่านฟอร์มด้านล่างได้เลย ไม่ต้องเขียน JSON เอง — ระบบแปลงเป็น config ให้อัตโนมัติและถูกต้องตามรูปแบบเสมอ ✅</div>
+    <div id="cfgEditor"></div>
+
+    <details class="cfg-advanced">
+      <summary>🔍 ดู JSON ที่จะถูกบันทึกจริง (สำหรับตรวจสอบ)</summary>
+      <pre id="s_config_preview"></pre>
+    </details>
 
     <div style="margin-top:14px;display:flex;gap:10px;">
       <button class="btn gold" onclick="saveMachine()">💾 บันทึกเครื่องจักร</button>
@@ -281,6 +316,262 @@ const CONFIG_TEMPLATES = {
     cadence: "weekly_or_daily"
   }
 };
+
+/* ============================================================
+   2b) CONFIG EDITOR — ฟอร์มโครงสร้าง แทนการพิมพ์ JSON เอง
+   แนวคิด: เก็บ "cfgState" เป็นโมเดลที่แก้ง่ายในฟอร์ม แล้วค่อยแปลงเป็น
+   config JSON จริงตอน preview/save ผ่าน configFromState()
+   ============================================================ */
+let cfgFamily = 'spot_nugget';
+let cfgState = {};
+
+const CONDITION_FIELDS = {
+  weld_length: [
+    {key:'current', label:'Current (A)'}, {key:'current_tol', label:'Tol. กระแส ±'},
+    {key:'volt', label:'Volt (V)'}, {key:'volt_tol', label:'Tol. โวลต์ ±'},
+    {key:'gas_flow', label:'Gas Flow (L/min)'},
+    {key:'wire_dia', label:'Wire Dia. (mm)'}, {key:'wire_type', label:'Wire Type', text:true}
+  ],
+  weld_hammer: [
+    {key:'current', label:'Current (A)'}, {key:'current_tol', label:'Tol. กระแส ±'},
+    {key:'volt', label:'Volt (V)'}, {key:'volt_tol', label:'Tol. โวลต์ ±'},
+    {key:'gas_flow', label:'Gas Flow (L/min)'}, {key:'gas_flow_tol', label:'Tol. แก๊ส ±'},
+    {key:'wire_dia', label:'Wire Dia. (mm)'}, {key:'wire_type', label:'Wire Type', text:true}
+  ],
+  weld_zeroset: [
+    {key:'current', label:'Current (A)'}, {key:'current_tol', label:'Tol. กระแส ±'},
+    {key:'gas_flow', label:'Gas Flow (L/min)'}, {key:'wire_type', label:'Wire Type', text:true}
+  ]
+};
+
+function isSpotFamily(f){ return f === 'spot_nugget' || f === 'spot_torque'; }
+function esc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function numOrNull(v){ if(v === '' || v === null || v === undefined) return null; const n = Number(v); return isNaN(n) ? v : n; }
+function cleanCondition(cond){
+  const out = {};
+  Object.keys(cond || {}).forEach(k=>{
+    const v = cond[k];
+    if(v === '' || v === undefined || v === null) return;
+    out[k] = (k === 'wire_type') ? v : numOrNull(v);
+  });
+  return out;
+}
+
+// config JSON (จาก template หรือจากเครื่องเดิม) -> โมเดลที่ฟอร์มแก้ไขได้ง่าย
+function stateFromConfig(family, config){
+  config = config || {};
+  if(isSpotFamily(family)){
+    const guns = (config.guns || []).map(name => ({
+      name,
+      stds: ((config.std_sets && config.std_sets[name]) || []).map(s => ({...s}))
+    }));
+    return {
+      guns,
+      time_unit: config.time_unit || 'sec',
+      points: [...(config.points || [])],
+      threshold: family === 'spot_torque' ? (config.torque_threshold_kgfcm ?? '') : (config.nugget_threshold_mm ?? ''),
+      driver_check: {...(config.driver_check || {style:'none'})}
+    };
+  }
+  if(family === 'weld_length'){
+    return {
+      condition: {...(config.condition || {})},
+      points: [...(config.points || [])],
+      length_std_min_mm: config.length_std_min_mm ?? '',
+      length_std_max_mm: config.length_std_max_mm ?? ''
+    };
+  }
+  if(family === 'weld_hammer'){
+    return { condition: {...(config.condition || {})} };
+  }
+  if(family === 'weld_zeroset'){
+    return {
+      condition: {...(config.condition || {})},
+      time_slots: [...(config.time_slots || [])],
+      cadence: config.cadence || 'weekly_or_daily'
+    };
+  }
+  return {};
+}
+
+// โมเดลฟอร์ม -> config JSON จริงที่จะบันทึกลง Supabase
+function configFromState(family, state){
+  if(isSpotFamily(family)){
+    const guns = state.guns.map(g => g.name);
+    const std_sets = {};
+    state.guns.forEach(g => {
+      std_sets[g.name] = g.stds.map(s => ({
+        label: s.label || '', squeeze: numOrNull(s.squeeze), slope: numOrNull(s.slope), weld: numOrNull(s.weld),
+        hold: numOrNull(s.hold), current: numOrNull(s.current), pressure: numOrNull(s.pressure), tip: numOrNull(s.tip)
+      }));
+    });
+    const out = { guns, std_sets, time_unit: state.time_unit, points: state.points, driver_check: {...state.driver_check} };
+    if(family === 'spot_torque') out.torque_threshold_kgfcm = numOrNull(state.threshold);
+    else out.nugget_threshold_mm = numOrNull(state.threshold);
+    return out;
+  }
+  if(family === 'weld_length'){
+    return {
+      condition: cleanCondition(state.condition),
+      points: state.points.map(p => numOrNull(p)),
+      length_std_min_mm: numOrNull(state.length_std_min_mm),
+      length_std_max_mm: numOrNull(state.length_std_max_mm)
+    };
+  }
+  if(family === 'weld_hammer'){
+    return { condition: cleanCondition(state.condition) };
+  }
+  if(family === 'weld_zeroset'){
+    return { condition: cleanCondition(state.condition), time_slots: state.time_slots, cadence: state.cadence };
+  }
+  return {};
+}
+
+function syncPreview(){
+  const pre = document.getElementById('s_config_preview');
+  if(pre) pre.textContent = JSON.stringify(configFromState(cfgFamily, cfgState), null, 2);
+}
+
+function renderTagList(field, arr, placeholder){
+  const chips = arr.map((v,i) => `<span class="tag-chip">${esc(v)}<button type="button" onclick="removeTag('${field}',${i})">✕</button></span>`).join('');
+  return `<div class="tag-list">${chips || '<span style="color:var(--muted);font-size:12px;">ยังไม่มีรายการ</span>'}</div>
+  <div class="tag-add">
+    <input id="tagInput_${field}" placeholder="${placeholder}" onkeydown="if(event.key==='Enter'){event.preventDefault();addTag('${field}');}">
+    <button type="button" class="btn" onclick="addTag('${field}')">+ เพิ่ม</button>
+  </div>`;
+}
+function addTag(field){
+  const input = document.getElementById('tagInput_'+field);
+  const val = input.value.trim();
+  if(!val) return;
+  cfgState[field].push(val);
+  renderConfigEditor();
+}
+function removeTag(field, i){ cfgState[field].splice(i,1); renderConfigEditor(); }
+
+function renderConditionBlock(family){
+  const items = CONDITION_FIELDS[family].map(f => {
+    const val = cfgState.condition[f.key] ?? '';
+    return `<div><label>${f.label}</label><input type="${f.text ? 'text' : 'number'}" ${f.text ? '' : 'step="any"'} value="${esc(val)}" oninput="cfgState.condition['${f.key}']=this.value;syncPreview();"></div>`;
+  }).join('');
+  return `<div class="cfg-mini-label">เงื่อนไขการเชื่อม (Condition)</div><div class="grid grid-4">${items}</div>`;
+}
+
+function renderGunBlock(g, gi){
+  const rows = g.stds.map((s, si) => `
+    <tr>
+      <td><input class="label-input" value="${esc(s.label)}" oninput="cfgState.guns[${gi}].stds[${si}].label=this.value;syncPreview();"></td>
+      <td><input type="number" step="any" value="${esc(s.squeeze)}" oninput="cfgState.guns[${gi}].stds[${si}].squeeze=this.value;syncPreview();"></td>
+      <td><input type="number" step="any" value="${esc(s.slope)}" oninput="cfgState.guns[${gi}].stds[${si}].slope=this.value;syncPreview();"></td>
+      <td><input type="number" step="any" value="${esc(s.weld)}" oninput="cfgState.guns[${gi}].stds[${si}].weld=this.value;syncPreview();"></td>
+      <td><input type="number" step="any" value="${esc(s.hold)}" oninput="cfgState.guns[${gi}].stds[${si}].hold=this.value;syncPreview();"></td>
+      <td><input type="number" step="any" value="${esc(s.current)}" oninput="cfgState.guns[${gi}].stds[${si}].current=this.value;syncPreview();"></td>
+      <td><input type="number" step="any" value="${esc(s.pressure)}" oninput="cfgState.guns[${gi}].stds[${si}].pressure=this.value;syncPreview();"></td>
+      <td><input type="number" step="any" value="${esc(s.tip)}" oninput="cfgState.guns[${gi}].stds[${si}].tip=this.value;syncPreview();"></td>
+      <td><button type="button" class="icon-btn" title="ลบ STD นี้" onclick="removeStd(${gi},${si})">✕</button></td>
+    </tr>`).join('');
+
+  return `
+  <div class="cfg-block">
+    <div class="cfg-block-head">
+      <input class="gun-name" value="${esc(g.name)}" oninput="cfgState.guns[${gi}].name=this.value;syncPreview();">
+      <button type="button" class="icon-btn" title="ลบ Gun นี้" onclick="removeGun(${gi})">✕</button>
+    </div>
+    <div class="std-table-wrap">
+      <table class="std-table gun-table">
+        <thead><tr><th>Label</th><th>Squeeze</th><th>Slope</th><th>Weld</th><th>Hold</th><th>Current</th><th>Pressure</th><th>Tip</th><th></th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="9" style="color:var(--muted);padding:12px;">ยังไม่มี STD — กด “+ เพิ่ม STD” ด้านล่าง</td></tr>'}</tbody>
+      </table>
+    </div>
+    <button type="button" class="icon-btn add" style="margin-top:8px;" onclick="addStd(${gi})">➕ เพิ่ม STD</button>
+  </div>`;
+}
+
+function renderSpotEditor(){
+  const thresholdLabel = cfgFamily === 'spot_torque' ? 'Torque Threshold (kgf·cm)' : 'Nugget Threshold (mm)';
+  const dc = cfgState.driver_check;
+  let html = `
+    <div class="grid grid-3" style="margin-bottom:14px;">
+      <div><label>หน่วยเวลา (Time Unit)</label>
+        <select onchange="cfgState.time_unit=this.value;syncPreview();">
+          <option value="sec" ${cfgState.time_unit==='sec'?'selected':''}>sec</option>
+          <option value="ms" ${cfgState.time_unit==='ms'?'selected':''}>ms</option>
+        </select>
+      </div>
+      <div><label>${thresholdLabel}</label>
+        <input type="number" step="any" value="${esc(cfgState.threshold)}" oninput="cfgState.threshold=this.value;syncPreview();">
+      </div>
+      <div><label>Driver Check</label>
+        <select onchange="setDriverCheckStyle(this.value)">
+          <option value="pallet" ${dc.style==='pallet'?'selected':''}>Pallet (นับจำนวนช่อง)</option>
+          <option value="every_n" ${dc.style==='every_n'?'selected':''}>ตรวจทุก N ชิ้น</option>
+          <option value="none" ${dc.style==='none'?'selected':''}>ไม่มี Driver Check</option>
+        </select>
+      </div>
+    </div>`;
+
+  if(dc.style === 'pallet'){
+    html += `<div class="grid grid-3" style="margin-top:-6px;margin-bottom:14px;">
+      <div><label>จำนวนช่อง Pallet</label><input type="number" value="${esc(dc.count)}" oninput="cfgState.driver_check.count=this.value;syncPreview();"></div>
+    </div>`;
+  } else if(dc.style === 'every_n'){
+    html += `<div class="grid grid-3" style="margin-top:-6px;margin-bottom:14px;">
+      <div><label>ตรวจทุก N ชิ้น</label><input type="number" value="${esc(dc.n)}" oninput="cfgState.driver_check.n=this.value;syncPreview();"></div>
+      <div><label>จำนวนจุดตรวจ (Checkpoints)</label><input type="number" value="${esc(dc.checkpoints)}" oninput="cfgState.driver_check.checkpoints=this.value;syncPreview();"></div>
+    </div>`;
+  }
+
+  html += `<div class="cfg-mini-label">จุดตรวจ (Points)</div>${renderTagList('points', cfgState.points, 'เช่น A1, A2, B')}`;
+  html += `<div class="cfg-mini-label" style="margin-top:18px;">Gun &amp; STD Set</div>`;
+  cfgState.guns.forEach((g, gi) => { html += renderGunBlock(g, gi); });
+  html += `<button type="button" class="icon-btn add" onclick="addGun()">➕ เพิ่ม Gun</button>`;
+  return html;
+}
+
+function renderWeldLengthExtra(){
+  return `
+  <div class="cfg-mini-label" style="margin-top:18px;">จุดตรวจวัด (Points)</div>
+  ${renderTagList('points', cfgState.points, 'เช่น 1, 2, 3')}
+  <div class="grid grid-3" style="margin-top:16px;">
+    <div><label>ความยาวแนวเชื่อม Min (mm)</label><input type="number" step="any" value="${esc(cfgState.length_std_min_mm)}" oninput="cfgState.length_std_min_mm=this.value;syncPreview();"></div>
+    <div><label>ความยาวแนวเชื่อม Max (mm)</label><input type="number" step="any" value="${esc(cfgState.length_std_max_mm)}" oninput="cfgState.length_std_max_mm=this.value;syncPreview();"></div>
+  </div>`;
+}
+
+function renderZerosetExtra(){
+  return `
+  <div class="cfg-mini-label" style="margin-top:18px;">รอบเวลาตรวจ (Time Slots)</div>
+  ${renderTagList('time_slots', cfgState.time_slots, 'เช่น 08:00')}
+  <div class="grid grid-3" style="margin-top:16px;">
+    <div><label>Cadence</label>
+      <select onchange="cfgState.cadence=this.value;syncPreview();">
+        <option value="weekly_or_daily" ${cfgState.cadence==='weekly_or_daily'?'selected':''}>Weekly / Daily</option>
+        <option value="daily" ${cfgState.cadence==='daily'?'selected':''}>Daily</option>
+        <option value="weekly" ${cfgState.cadence==='weekly'?'selected':''}>Weekly</option>
+      </select>
+    </div>
+  </div>`;
+}
+
+function renderConfigEditor(){
+  const el = document.getElementById('cfgEditor');
+  if(isSpotFamily(cfgFamily)) el.innerHTML = renderSpotEditor();
+  else if(cfgFamily === 'weld_length') el.innerHTML = renderConditionBlock('weld_length') + renderWeldLengthExtra();
+  else if(cfgFamily === 'weld_hammer') el.innerHTML = renderConditionBlock('weld_hammer');
+  else if(cfgFamily === 'weld_zeroset') el.innerHTML = renderConditionBlock('weld_zeroset') + renderZerosetExtra();
+  syncPreview();
+}
+
+function addGun(){ cfgState.guns.push({name:`SERVO GUN #${cfgState.guns.length+1}`, stds:[]}); renderConfigEditor(); }
+function removeGun(gi){ cfgState.guns.splice(gi,1); renderConfigEditor(); }
+function addStd(gi){ cfgState.guns[gi].stds.push({label:`STD#${cfgState.guns[gi].stds.length+1}`, squeeze:'', slope:'', weld:'', hold:'', current:'', pressure:'', tip:''}); renderConfigEditor(); }
+function removeStd(gi, si){ cfgState.guns[gi].stds.splice(si,1); renderConfigEditor(); }
+function setDriverCheckStyle(style){
+  if(style==='pallet') cfgState.driver_check = {style:'pallet', count:35};
+  else if(style==='every_n') cfgState.driver_check = {style:'every_n', n:10, checkpoints:13};
+  else cfgState.driver_check = {style:'none'};
+  renderConfigEditor();
+}
 
 let editingMachineId = null; // null = กำลังเพิ่มเครื่องใหม่ / มีค่า = กำลังแก้ไขเครื่องเดิม
 
@@ -818,10 +1109,17 @@ async function populateFormFromRecord(family, recordId){
    7) SETUP — เพิ่ม/แก้ไข/ลบเครื่องจักร (machines table)
    ============================================================ */
 function loadConfigTemplate(){
-  // โหลด template เฉพาะตอน "เพิ่มเครื่องใหม่" เท่านั้น — ถ้ากำลังแก้ไขเครื่องเดิมอยู่ ไม่ทับ config ที่โหลดมา
-  if(editingMachineId) return;
-  const family = document.getElementById('s_family').value;
-  document.getElementById('s_config').value = JSON.stringify(CONFIG_TEMPLATES[family], null, 2);
+  const newFamily = document.getElementById('s_family').value;
+  if(editingMachineId){
+    // กำลังแก้ไขเครื่องเดิม — ถ้าสลับ family ให้พยายามแปลง field ที่ยังใช้ร่วมกันได้ต่อ แทนที่จะล้างทิ้งทั้งหมด
+    const currentConfig = configFromState(cfgFamily, cfgState);
+    cfgFamily = newFamily;
+    cfgState = stateFromConfig(cfgFamily, currentConfig);
+  } else {
+    cfgFamily = newFamily;
+    cfgState = stateFromConfig(cfgFamily, CONFIG_TEMPLATES[cfgFamily]);
+  }
+  renderConfigEditor();
 }
 
 function resetSetupForm(){
@@ -830,7 +1128,9 @@ function resetSetupForm(){
   ['s_customer','s_model','s_machineno','s_partno','s_partname','s_rank','s_docno','s_runno','s_revno','s_revdate','s_issuedate']
     .forEach(id => document.getElementById(id).value = '');
   document.getElementById('s_family').value = 'spot_nugget';
-  loadConfigTemplate();
+  cfgFamily = 'spot_nugget';
+  cfgState = stateFromConfig(cfgFamily, CONFIG_TEMPLATES[cfgFamily]);
+  renderConfigEditor();
 }
 
 async function saveMachine(){
@@ -839,16 +1139,10 @@ async function saveMachine(){
   const partName = document.getElementById('s_partname').value.trim();
   if(!partNo || !partName){ toast('กรอก Part No. และ Part Name ก่อนค่ะ'); return; }
 
-  let config;
-  try{
-    config = JSON.parse(document.getElementById('s_config').value);
-  }catch(e){
-    toast('❌ Config JSON ผิดรูปแบบ — เช็คเครื่องหมาย , หรือ { } ให้ครบ: '+e.message);
-    return;
-  }
+  const config = configFromState(cfgFamily, cfgState);
 
   const payload = {
-    family: document.getElementById('s_family').value,
+    family: cfgFamily,
     customer: document.getElementById('s_customer').value || null,
     model: document.getElementById('s_model').value || null,
     machine_no: document.getElementById('s_machineno').value || null,
@@ -912,7 +1206,9 @@ function editMachine(id){
   document.getElementById('s_revno').value = m.rev_no || '';
   document.getElementById('s_revdate').value = m.rev_date || '';
   document.getElementById('s_issuedate').value = m.issue_form_date || '';
-  document.getElementById('s_config').value = JSON.stringify(m.config, null, 2);
+  cfgFamily = m.family;
+  cfgState = stateFromConfig(cfgFamily, m.config);
+  renderConfigEditor();
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
