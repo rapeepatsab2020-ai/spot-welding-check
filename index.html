@@ -129,17 +129,17 @@
 <section id="tab-inspect" style="display:none">
   <div class="card" id="lotStatusBar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <div>
-      <span id="lotStatusBadge" class="badge draft">🆕 กำลังเปิด Lot ใหม่</span>
-      <div class="hint" id="lotStatusHint" style="margin-top:6px;">กรอก STD/ACT + Driver Check + Nugget (Start) แล้วบันทึก จากนั้นกลับมาที่แท็บ "ประวัติ" เพื่อเปิด Lot นี้กรอก Middle/End ต่อภายหลัง</div>
+      <span id="lotStatusBadge" class="badge draft">🆕 กำลังเปิด Order ใหม่</span>
+      <div class="hint" id="lotStatusHint" style="margin-top:6px;">กรอก STD/ACT + Driver Check + Nugget (Start) แล้วบันทึก จากนั้นกลับมาที่แท็บ "ประวัติ" เพื่อเปิด Order นี้กรอก Middle/End ต่อภายหลัง</div>
     </div>
-    <button class="btn ghost small" onclick="startNewLot()">+ เปิด Lot ใหม่</button>
+    <button class="btn ghost small" onclick="startNewLot()">+ เปิด Order ใหม่</button>
   </div>
 
   <div class="card">
-    <h2>ข้อมูลการตรวจสอบ (Lot)</h2>
+    <h2>ข้อมูลการตรวจสอบ (Order No.)</h2>
     <div class="grid grid-3">
       <div><label>เครื่องจักร / Part</label><select id="ins_machine" onchange="renderGunTables()"></select></div>
-      <div><label>Lot / Run No.</label><input id="ins_lotno" placeholder="เช่น LOT-0818-01"></div>
+      <div><label>Order No. / Run No.</label><input id="ins_lotno" placeholder="เช่น ORDER-0818-01"></div>
       <div><label>วันที่ตรวจสอบ</label><input id="ins_date" type="date"></div>
       <div><label>ผู้ตรวจสอบ</label><input id="ins_inspector" placeholder="ชื่อพนักงาน"></div>
       <div><label>กะ (Shift)</label>
@@ -150,19 +150,19 @@
   </div>
 
   <div class="card">
-    <h2>1) เงื่อนไขการปรับเครื่องสป๊อต (STD vs ACT) <span class="hint">— กรอกครั้งเดียวตอนเปิด Lot (แก้ไขภายหลังได้)</span></h2>
+    <h2>1) เงื่อนไขการปรับเครื่องสป๊อต (STD vs ACT) <span class="hint">— กรอกครั้งเดียวตอนเปิด Order (แก้ไขภายหลังได้)</span></h2>
     <div id="gunTablesArea" class="empty">เลือกเครื่องจักรก่อนเพื่อโหลดค่ามาตรฐาน</div>
   </div>
 
   <div class="card">
-    <h2>2) Driver Check — Pallet 1-35 <span class="hint">— กรอกครั้งเดียวตอนเปิด Lot</span></h2>
+    <h2>2) Driver Check — Pallet 1-35 <span class="hint">— กรอกครั้งเดียวตอนเปิด Order</span></h2>
     <div id="palletGrid" class="grid35"></div>
     <div class="hint">แตะ 1 ครั้ง = ✓ ติดแน่น (เขียว) · แตะอีกครั้ง = X ไม่ติด (แดง) · แตะอีกครั้ง = ล้างค่า</div>
   </div>
 
   <div class="card">
     <h2>3) Nugget Test (มาตรฐาน ≥ 4.2 mm.)</h2>
-    <div class="hint" style="margin-bottom:8px;">กรอกได้ทีละช่วง — เริ่ม Lot กรอก Start ก่อน แล้วกลับมาเปิด Lot นี้ (จากแท็บประวัติ) กรอก Middle และ End ภายหลังตามจริง ไม่ต้องกรอกครบทั้ง 3 ช่องในครั้งเดียว</div>
+    <div class="hint" style="margin-bottom:8px;">กรอกได้ทีละช่วง — เริ่ม Order กรอก Start ก่อน แล้วกลับมาเปิด Order นี้ (จากแท็บประวัติ) กรอก Middle และ End ภายหลังตามจริง ไม่ต้องกรอกครบทั้ง 3 ช่องในครั้งเดียว</div>
     <table>
       <thead><tr><th>จุด</th><th>Start</th><th>Middle</th><th>End</th><th>ผล</th></tr></thead>
       <tbody id="nuggetBody"></tbody>
@@ -170,7 +170,7 @@
   </div>
 
   <div class="card" style="text-align:right;">
-    <button class="btn gold" onclick="saveRecord()">💾 บันทึก Lot นี้</button>
+    <button class="btn gold" onclick="saveRecord()">💾 บันทึก Order นี้</button>
     <div class="hint" style="text-align:right;margin-top:6px;">ระบบจะเปลี่ยนสถานะเป็น "เสร็จสมบูรณ์" ให้อัตโนมัติ เมื่อกรอกครบ Nugget End ทั้ง 3 จุด (A1, A2, B)</div>
   </div>
 </section>
@@ -179,7 +179,7 @@
 <section id="tab-history" style="display:none">
   <div class="card">
     <h2>ประวัติการตรวจสอบทั้งหมด</h2>
-    <div class="hint" style="margin-bottom:10px;">แตะที่ Lot ใดก็ได้เพื่อเปิดกลับมากรอก Middle / End ต่อ หรือแก้ไขข้อมูล</div>
+    <div class="hint" style="margin-bottom:10px;">แตะที่ Order ใดก็ได้เพื่อเปิดกลับมากรอก Middle / End ต่อ หรือแก้ไขข้อมูล</div>
     <div id="historyList" class="empty">ยังไม่มีข้อมูล</div>
   </div>
 </section>
@@ -216,24 +216,24 @@ const GUN_FIELDS = [
 ];
 const NUGGET_POINTS = ['A1','A2','B'];
 
-/* ---------- Lot state (edit vs new) ---------- */
-let currentRecordId = null; // null = กำลังเปิด Lot ใหม่, มีค่า = กำลังแก้ไข/กรอกต่อ Lot เดิม
+/* ---------- Order state (edit vs new) ---------- */
+let currentRecordId = null; // null = กำลังเปิด Order ใหม่, มีค่า = กำลังแก้ไข/กรอกต่อ Lot เดิม
 
 function updateLotStatusBadge(status){
   const badge = document.getElementById('lotStatusBadge');
   const hint = document.getElementById('lotStatusHint');
   if(!currentRecordId){
     badge.className = 'badge draft';
-    badge.textContent = '🆕 กำลังเปิด Lot ใหม่';
-    hint.textContent = 'กรอก STD/ACT + Driver Check + Nugget (Start) แล้วบันทึก จากนั้นกลับมาที่แท็บ "ประวัติ" เพื่อเปิด Lot นี้กรอก Middle/End ต่อภายหลัง';
+    badge.textContent = '🆕 กำลังเปิด Order ใหม่';
+    hint.textContent = 'กรอก STD/ACT + Driver Check + Nugget (Start) แล้วบันทึก จากนั้นกลับมาที่แท็บ "ประวัติ" เพื่อเปิด Order นี้กรอก Middle/End ต่อภายหลัง';
   } else if(status === 'submitted'){
     badge.className = 'badge ok';
-    badge.textContent = '✅ Lot #' + currentRecordId + ' — เสร็จสมบูรณ์ (แก้ไขเพิ่มได้)';
-    hint.textContent = 'Lot นี้กรอกครบ Nugget End ทั้ง 3 จุดแล้ว ยังแก้ไขค่าย้อนหลังได้หากจำเป็น';
+    badge.textContent = '✅ Order #' + currentRecordId + ' — เสร็จสมบูรณ์ (แก้ไขเพิ่มได้)';
+    hint.textContent = 'Order นี้กรอกครบ Nugget End ทั้ง 3 จุดแล้ว ยังแก้ไขค่าย้อนหลังได้หากจำเป็น';
   } else {
     badge.className = 'badge draft';
-    badge.textContent = '🔄 กำลังแก้ไข Lot #' + currentRecordId + ' (เปิดค้างอยู่)';
-    hint.textContent = 'กรอก Middle / End เพิ่มเติมได้เลย แล้วกดบันทึก — ไม่ต้องเปิด Lot ใหม่';
+    badge.textContent = '🔄 กำลังแก้ไข Order #' + currentRecordId + ' (เปิดค้างอยู่)';
+    hint.textContent = 'กรอก Middle / End เพิ่มเติมได้เลย แล้วกดบันทึก — ไม่ต้องเปิด Order ใหม่';
   }
 }
 
@@ -249,13 +249,13 @@ function startNewLot(){
   renderNuggetTable({});
   renderGunTables();
   updateLotStatusBadge();
-  toast('เริ่มเปิด Lot ใหม่');
+  toast('เริ่มเปิด Order ใหม่');
 }
 
 async function loadRecordForEdit(recordId){
   if(!configured) return;
   const {data: rec, error} = await db.from('spot_records').select('*').eq('id', recordId).single();
-  if(error || !rec) return toast('โหลด Lot ไม่สำเร็จ: ' + (error?.message||''));
+  if(error || !rec) return toast('โหลด Order ไม่สำเร็จ: ' + (error?.message||''));
 
   // สลับไปแท็บ Inspect
   document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
@@ -291,7 +291,7 @@ async function loadRecordForEdit(recordId){
   renderNuggetTable(nugMap);
 
   updateLotStatusBadge(rec.status);
-  toast('เปิด Lot #' + recordId + ' มากรอกต่อแล้ว');
+  toast('เปิด Order #' + recordId + ' มากรอกต่อแล้ว');
 }
 
 function toast(msg){
@@ -501,7 +501,7 @@ function checkNugget(p){
   resCell.innerHTML = ok? '<span class="pass">✓ PASS</span>' : '<span class="fail">✕ FAIL (&lt;4.2mm)</span>';
 }
 
-/* ---------- Save full inspection record (เปิดใหม่ หรือ กรอกต่อ Lot เดิม) ---------- */
+/* ---------- Save full inspection record (เปิดใหม่ หรือ กรอกต่อ Order เดิม) ---------- */
 async function saveRecord(){
   if(!configured) return toast('ยังไม่ได้ตั้งค่า Supabase ค่ะ');
   const machineId = document.getElementById('ins_machine').value;
@@ -576,7 +576,7 @@ async function saveRecord(){
   }
 
   updateLotStatusBadge(newStatus);
-  toast(newStatus==='submitted' ? '✅ บันทึกสำเร็จ — Lot นี้ครบ Nugget End แล้ว' : '💾 บันทึกสำเร็จ — เปิด Lot นี้กรอกต่อได้ภายหลัง');
+  toast(newStatus==='submitted' ? '✅ บันทึกสำเร็จ — Order นี้ครบ Nugget End แล้ว' : '💾 บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
 }
 
 /* ---------- History ---------- */
@@ -591,7 +591,7 @@ async function loadHistory(){
   el.innerHTML = data.map(r=>`
     <div class="hist-row" onclick="loadRecordForEdit(${r.id})">
       <div>
-        <b>${r.spot_machines?.machine_no||'-'}</b> · ${r.spot_machines?.part_name||'-'} ${r.lot_no? ' · Lot: '+r.lot_no : ''}
+        <b>${r.spot_machines?.machine_no||'-'}</b> · ${r.spot_machines?.part_name||'-'} ${r.lot_no? ' · Order No.: '+r.lot_no : ''}
         <div class="meta">${r.record_date} · ผู้ตรวจ: ${r.inspector_name||'-'} · กะ: ${r.shift||'-'} · จำนวน: ${r.total_quantity||'-'}</div>
       </div>
       <span class="badge ${r.status==='submitted'?'ok':'draft'}">${r.status==='submitted'?'✅ เสร็จสมบูรณ์':'🔄 เปิดอยู่'}</span>
