@@ -170,6 +170,7 @@
   </div>
 
   <div class="card" style="text-align:right;">
+    <button class="btn ghost" onclick="clearInspectForm()">🔄 เริ่มใหม่</button>
     <button class="btn gold" onclick="saveRecord()">💾 บันทึก Order นี้</button>
     <div class="hint" style="text-align:right;margin-top:6px;">ระบบจะเปลี่ยนสถานะเป็น "เสร็จสมบูรณ์" ให้อัตโนมัติ เมื่อกรอกครบ Nugget End ทั้ง 3 จุด (A1, A2, B)</div>
   </div>
@@ -235,6 +236,14 @@ function updateLotStatusBadge(status){
     badge.textContent = '🔄 กำลังแก้ไข Order #' + currentRecordId + ' (เปิดค้างอยู่)';
     hint.textContent = 'กรอก Middle / End เพิ่มเติมได้เลย แล้วกดบันทึก — ไม่ต้องเปิด Order ใหม่';
   }
+}
+
+function clearInspectForm(){
+  const msg = currentRecordId
+    ? 'ล้างข้อมูลที่กรอกไว้ทั้งหมดในหน้านี้ และเลิกแก้ไข Order #' + currentRecordId + ' หรือไม่?'
+    : 'ล้างข้อมูลที่กรอกไว้ทั้งหมดในหน้านี้หรือไม่?';
+  if(!confirm(msg)) return;
+  startNewLot();
 }
 
 function startNewLot(){
