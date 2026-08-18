@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spot Welding Check | Summit Auto Body</title>
+<title>Dynamic Inspection Form | Hybrid Schema</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -14,174 +14,164 @@
   }
   *{box-sizing:border-box;}
   body{margin:0;font-family:'Noto Sans Thai',sans-serif;background:var(--bg);color:var(--text);}
-  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px;}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  header h1{font-size:18px;margin:0;font-weight:700;}
   header .sub{font-size:12px;color:var(--gold-l);margin-top:2px;}
-  nav{display:flex;gap:8px;padding:12px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:10;}
-  nav button{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
-  nav button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
-  nav button:hover:not(.active){border-color:var(--gold);}
   main{max-width:1100px;margin:0 auto;padding:20px;}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
-  .card h2{font-size:16px;margin:0 0 14px;color:var(--navy);border-left:4px solid var(--gold);padding-left:10px;}
+  .card h2{font-size:16px;margin:0 0 4px;color:var(--navy);border-left:4px solid var(--gold);padding-left:10px;}
+  .card .desc{font-size:12px;color:var(--muted);margin:0 0 14px;padding-left:14px;}
   .grid{display:grid;gap:12px;}
-  .grid-2{grid-template-columns:1fr 1fr;}
   .grid-3{grid-template-columns:1fr 1fr 1fr;}
-  @media(max-width:700px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+  .grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+  @media(max-width:700px){.grid-3,.grid-4{grid-template-columns:1fr;}}
   label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:600;}
-  input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:14px;background:#fbfcfd;}
-  input:focus,select:focus{outline:none;border-color:var(--navy2);background:#fff;}
+  select,input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:14px;background:#fbfcfd;}
+  select:focus,input:focus,textarea:focus{outline:none;border-color:var(--navy2);background:#fff;}
+  .family-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#eef2f8;color:var(--navy2);margin-left:8px;vertical-align:middle;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:center;}
+  th{background:#f0f3f7;color:var(--navy);font-weight:700;font-size:12px;}
+  .gun-table td:first-child, .gun-table th:first-child{text-align:left;background:#f7f9fb;font-weight:600;width:150px;}
+  .std-cell{color:var(--muted);font-size:11.5px;}
+  .act-input{width:70px;padding:5px;text-align:center;}
+  .grid35{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:6px;margin-top:8px;}
+  .pallet-btn{border:1px solid var(--line);border-radius:7px;padding:7px 4px;text-align:center;cursor:pointer;font-size:11.5px;background:#fbfcfd;user-select:none;}
+  .pallet-btn .num{font-size:10.5px;color:var(--muted);}
+  .pallet-btn .mark{font-size:15px;font-weight:800;}
+  .pallet-btn.ok{background:#eafaf1;border-color:var(--ok);color:var(--ok);}
+  .pallet-btn.ng{background:#fdecea;border-color:var(--fail);color:var(--fail);}
+  .pass{color:var(--ok);font-weight:700;}
+  .fail{color:var(--fail);font-weight:700;background:#fdecea;}
+  .sect-title{font-size:13px;font-weight:700;color:var(--navy);margin:16px 0 8px;}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:6px;}
+  .empty{color:var(--muted);text-align:center;padding:30px;font-size:13px;}
   .btn{background:var(--navy);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;}
   .btn:hover{background:var(--navy2);}
   .btn.gold{background:var(--gold);color:var(--navy);}
   .btn.gold:hover{background:var(--gold-l);}
-  .btn.ghost{background:#fff;color:var(--navy);border:1px solid var(--line);}
-  .btn.small{padding:6px 10px;font-size:12px;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  th,td{border:1px solid var(--line);padding:6px 8px;text-align:center;}
-  th{background:#f0f3f7;color:var(--navy);font-weight:700;}
-  .gun-table td:first-child, .gun-table th:first-child{text-align:left;background:#f7f9fb;font-weight:600;width:130px;}
-  .std-cell{color:var(--muted);font-size:12px;}
-  .act-input{width:70px;padding:5px;text-align:center;}
-  .pass{color:var(--ok);font-weight:700;}
-  .fail{color:var(--fail);font-weight:700;background:#fdecea;}
-  .grid35{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;margin-top:8px;}
-  .pallet-btn{border:1px solid var(--line);border-radius:7px;padding:8px 4px;text-align:center;cursor:pointer;font-size:12px;background:#fbfcfd;user-select:none;}
-  .pallet-btn .num{font-size:11px;color:var(--muted);}
-  .pallet-btn .mark{font-size:16px;font-weight:800;}
-  .pallet-btn.ok{background:#eafaf1;border-color:var(--ok);color:var(--ok);}
-  .pallet-btn.ng{background:#fdecea;border-color:var(--fail);color:var(--fail);}
-  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
-  .badge.ok{background:#eafaf1;color:var(--ok);}
-  .badge.ng{background:#fdecea;color:var(--fail);}
-  .badge.draft{background:#fff6e0;color:var(--warn);}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:100;opacity:0;transition:.25s;}
+  .toast.show{opacity:1;}
+  #setupNotice{font-size:13px;background:#fff6e0;border:1px solid var(--gold);padding:12px 14px;border-radius:9px;margin-bottom:16px;}
+  #setupNotice code{background:#fff;padding:1px 5px;border-radius:4px;}
   .hist-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:#fbfcfd;cursor:pointer;}
   .hist-row:hover{border-color:var(--navy2);}
   .hist-row .meta{font-size:12px;color:var(--muted);margin-top:3px;}
-  .empty{color:var(--muted);text-align:center;padding:30px;font-size:13px;}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:100;opacity:0;transition:.25s;}
-  .toast.show{opacity:1;}
-  .sect-title{font-size:13px;font-weight:700;color:var(--navy);margin:16px 0 8px;}
-  .hint{font-size:11.5px;color:var(--muted);margin-top:6px;}
-  #setupNotice{font-size:13px;background:#fff6e0;border:1px solid var(--gold);padding:12px 14px;border-radius:9px;margin-bottom:16px;}
-  #setupNotice code{background:#fff;padding:1px 5px;border-radius:4px;}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
+  .badge.ok{background:#eafaf1;color:var(--ok);}
+  .badge.draft{background:#fff6e0;color:var(--warn);}
 </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>⚙️ Spot Welding Check</h1>
-    <div class="sub">Summit Auto Body Industry — Ayutthaya</div>
+    <h1>⚙️ Dynamic Inspection Form</h1>
+    <div class="sub">Hybrid Schema — อ่าน config JSON แล้ว render + บันทึกลง Supabase อัตโนมัติ</div>
   </div>
   <div class="sub" id="connStatus">กำลังเชื่อมต่อ...</div>
 </header>
 
-<nav>
-  <button class="tab-btn active" data-tab="setup">🏭 Setup เครื่อง/มาตรฐาน</button>
-  <button class="tab-btn" data-tab="inspect">📝 บันทึกตรวจสอบใหม่</button>
-  <button class="tab-btn" data-tab="history">📋 ประวัติการตรวจสอบ</button>
+<nav style="display:flex;gap:8px;padding:12px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:10;">
+  <button class="tab-btn" data-tab="setup" onclick="switchTab('setup')" style="border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">🏭 Setup เครื่องจักร</button>
+  <button class="tab-btn active" data-tab="form" onclick="switchTab('form')" style="border:1px solid var(--line);background:var(--navy);color:#fff;padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">📝 กรอกฟอร์ม</button>
+  <button class="tab-btn" data-tab="history" onclick="switchTab('history')" style="border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">📋 ประวัติ / กรอกต่อ</button>
 </nav>
 
 <main>
 
 <div id="setupNotice">
-  ⚠️ ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์ index.html (บรรทัด script ด้านล่างสุด) ก่อนใช้งานจริงนะคะ
+  ⚠️ ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์นี้ (บรรทัด script ด้านล่างสุด) ก่อนใช้งานจริงนะคะ ระหว่างนี้ใช้ mock data แสดงตัวอย่างไปก่อน
 </div>
 
-<!-- ============ TAB: SETUP ============ -->
-<section id="tab-setup">
-  <div class="card">
-    <h2>เพิ่มเครื่องจักร / Part</h2>
-    <div class="grid grid-3">
-      <div><label>เครื่องจักรเบอร์ (Machine No.)</label><input id="m_no" placeholder="RB168"></div>
-      <div><label>Model</label><input id="m_model" placeholder="RG01"></div>
-      <div><label>RANK</label><input id="m_rank" placeholder="U"></div>
-      <div><label>Part No.</label><input id="m_partno" placeholder="898385 7902"></div>
-      <div><label>Part Name</label><input id="m_partname" placeholder="SILL; ASM FLOOR RR"></div>
-      <div><label>Doc No.</label><input id="m_docno" placeholder="QA4-2-016"></div>
-      <div><label>Rev.No / Rev.Date</label>
-        <div style="display:flex;gap:6px;">
-          <input id="m_revno" placeholder="Rev.No" style="width:40%">
-          <input id="m_revdate" type="date">
-        </div>
-      </div>
-      <div><label>Run No.</label><input id="m_runno" placeholder="SWC-RG01-028"></div>
-      <div><label>Issue Form (วันที่)</label><input id="m_issue" type="date"></div>
-    </div>
-    <button class="btn gold" style="margin-top:14px" onclick="saveMachine()">+ บันทึกเครื่องจักร</button>
-  </div>
+<!-- ============ TAB: FORM ============ -->
+<section id="tab-form">
 
-  <div class="card">
-    <h2>ตั้งค่า STD (มาตรฐานเครื่องสป๊อต) ต่อเครื่อง</h2>
-    <label>เลือกเครื่องจักร</label>
-    <select id="std_machine" onchange="loadStdForm()"></select>
-    <div id="stdFormArea" style="margin-top:14px;"></div>
+<div class="card" id="lotStatusBar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+  <div>
+    <span id="lotStatusBadge" class="family-badge" style="background:#fff6e0;color:var(--warn);">🆕 กำลังเปิด Order ใหม่</span>
+    <div class="hint" id="lotStatusHint" style="margin-top:6px;">กรอกข้อมูลแล้วกด "บันทึก" ได้เลย — กลับมากรอกต่อ (Middle/End) ได้ภายหลังจากแท็บ "ประวัติ / กรอกต่อ"</div>
   </div>
+  <button class="btn ghost small" style="background:#fff;color:var(--navy);border:1px solid var(--line);padding:6px 10px;font-size:12px;border-radius:8px;cursor:pointer;" onclick="startNewLot()">+ เปิด Order ใหม่</button>
+</div>
 
-  <div class="card">
-    <h2>รายการเครื่องจักรทั้งหมด</h2>
-    <div id="machineList" class="empty">ยังไม่มีข้อมูล</div>
-  </div>
-</section>
+<div class="card">
+  <h2>เลือกเครื่องจักร / Part</h2>
+  <div class="desc">ดึงจาก <code>machines</code> table ทั้งหมด (ทุก family ปนกัน) — เลือกแล้วฟอร์มจะเปลี่ยนเองอัตโนมัติ</div>
+  <select id="machineSelect" onchange="onMachineChange()"></select>
+  <div id="familyBadgeArea" style="margin-top:8px"></div>
+</div>
 
-<!-- ============ TAB: INSPECT ============ -->
-<section id="tab-inspect" style="display:none">
-  <div class="card" id="lotStatusBar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-    <div>
-      <span id="lotStatusBadge" class="badge draft">🆕 กำลังเปิด Order ใหม่</span>
-      <div class="hint" id="lotStatusHint" style="margin-top:6px;">กรอก STD/ACT + Driver Check + Nugget (Start) แล้วบันทึก จากนั้นกลับมาที่แท็บ "ประวัติ" เพื่อเปิด Order นี้กรอก Middle/End ต่อภายหลัง</div>
-    </div>
-    <button class="btn ghost small" onclick="startNewLot()">+ เปิด Order ใหม่</button>
-  </div>
-
-  <div class="card">
-    <h2>ข้อมูลการตรวจสอบ (Order No.)</h2>
-    <div class="grid grid-3">
-      <div><label>เครื่องจักร / Part</label><select id="ins_machine" onchange="renderGunTables()"></select></div>
-      <div><label>Order No. / Run No.</label><input id="ins_lotno" placeholder="เช่น ORDER-0818-01"></div>
-      <div><label>วันที่ตรวจสอบ</label><input id="ins_date" type="date"></div>
-      <div><label>ผู้ตรวจสอบ</label><input id="ins_inspector" placeholder="ชื่อพนักงาน"></div>
-      <div><label>กะ (Shift)</label>
-        <select id="ins_shift"><option value="">-</option><option>เช้า</option><option>บ่าย</option><option>ดึก</option></select>
-      </div>
-      <div><label>จำนวนผลิตรวม (Total Quantity)</label><input id="ins_qty" type="number" placeholder="เช่น 350"></div>
+<div class="card" id="orderInfoCard">
+  <h2>ข้อมูล Order / รอบตรวจ</h2>
+  <div class="grid grid-4">
+    <div><label>Order No. / Lot No.</label><input id="rec_lotno" placeholder="เช่น ORDER-0818-01"></div>
+    <div><label>วันที่ตรวจสอบ</label><input id="rec_date" type="date"></div>
+    <div><label>ผู้ตรวจสอบ</label><input id="rec_inspector" placeholder="ชื่อพนักงาน"></div>
+    <div><label>กะ (Shift)</label>
+      <select id="rec_shift"><option value="">-</option><option>เช้า</option><option>บ่าย</option><option>ดึก</option></select>
     </div>
   </div>
+</div>
 
-  <div class="card">
-    <h2>1) เงื่อนไขการปรับเครื่องสป๊อต (STD vs ACT) <span class="hint">— กรอกครั้งเดียวตอนเปิด Order (แก้ไขภายหลังได้)</span></h2>
-    <div id="gunTablesArea" class="empty">เลือกเครื่องจักรก่อนเพื่อโหลดค่ามาตรฐาน</div>
-  </div>
+<div id="formArea"></div>
 
-  <div class="card">
-    <h2>2) Driver Check — Pallet 1-35 <span class="hint">— กรอกครั้งเดียวตอนเปิด Order</span></h2>
-    <div id="palletGrid" class="grid35"></div>
-    <div class="hint">แตะ 1 ครั้ง = ✓ ติดแน่น (เขียว) · แตะอีกครั้ง = X ไม่ติด (แดง) · แตะอีกครั้ง = ล้างค่า</div>
-  </div>
+<div class="card" id="saveArea" style="display:flex;justify-content:flex-end;gap:10px">
+  <button class="btn gold" onclick="saveRecord()">💾 บันทึก</button>
+</div>
 
-  <div class="card">
-    <h2>3) Nugget Test (มาตรฐาน ≥ 4.2 mm.)</h2>
-    <div class="hint" style="margin-bottom:8px;">กรอกได้ทีละช่วง — เริ่ม Order กรอก Start ก่อน แล้วกลับมาเปิด Order นี้ (จากแท็บประวัติ) กรอก Middle และ End ภายหลังตามจริง ไม่ต้องกรอกครบทั้ง 3 ช่องในครั้งเดียว</div>
-    <table>
-      <thead><tr><th>จุด</th><th>Start</th><th>Middle</th><th>End</th><th>ผล</th></tr></thead>
-      <tbody id="nuggetBody"></tbody>
-    </table>
-  </div>
-
-  <div class="card" style="text-align:right;">
-    <button class="btn ghost" onclick="clearInspectForm()">🔄 เริ่มใหม่</button>
-    <button class="btn gold" onclick="saveRecord()">💾 บันทึก Order นี้</button>
-    <div class="hint" style="text-align:right;margin-top:6px;">ระบบจะเปลี่ยนสถานะเป็น "เสร็จสมบูรณ์" ให้อัตโนมัติ เมื่อกรอกครบ Nugget End ทั้ง 3 จุด (A1, A2, B)</div>
-  </div>
 </section>
 
 <!-- ============ TAB: HISTORY ============ -->
 <section id="tab-history" style="display:none">
   <div class="card">
-    <h2>ประวัติการตรวจสอบทั้งหมด</h2>
-    <div class="hint" style="margin-bottom:10px;">แตะที่ Order ใดก็ได้เพื่อเปิดกลับมากรอก Middle / End ต่อ หรือแก้ไขข้อมูล</div>
-    <div id="historyList" class="empty">ยังไม่มีข้อมูล</div>
+    <h2>ประวัติการตรวจสอบ (ทุกเครื่อง/ทุก family)</h2>
+    <div class="desc">คลิกที่รายการเพื่อกรอกต่อหรือแก้ไข Order เดิม — ไม่สร้าง Order ซ้ำ</div>
+    <div id="historyList" class="empty">กำลังโหลด...</div>
+  </div>
+</section>
+
+<!-- ============ TAB: SETUP ============ -->
+<section id="tab-setup" style="display:none">
+  <div class="card">
+    <h2 id="setupFormTitle">เพิ่มเครื่องจักร / Part ใหม่</h2>
+    <div class="desc">เลือก family ก่อน ระบบจะดึง config JSON ตัวอย่างมาให้แก้ได้เลย — ไม่ต้องเขียนเองตั้งแต่ต้น</div>
+    <div class="grid grid-4">
+      <div><label>Family</label>
+        <select id="s_family" onchange="loadConfigTemplate()">
+          <option value="spot_nugget">🔩 สป๊อต · Nugget Test</option>
+          <option value="spot_torque">🔩 สป๊อต · Test Torque</option>
+          <option value="weld_length">🔧 เชื่อม · วัดความยาวแนวเชื่อม</option>
+          <option value="weld_hammer">🔧 เชื่อม · ค้อนเคาะ + Visual</option>
+          <option value="weld_zeroset">🔧 เชื่อม · Zero Set Log</option>
+        </select>
+      </div>
+      <div><label>Customer</label><input id="s_customer" placeholder="ISUZU, IEMT, HATC..."></div>
+      <div><label>Model</label><input id="s_model" placeholder="RG01"></div>
+      <div><label>Machine No.</label><input id="s_machineno" placeholder="RB168"></div>
+      <div><label>Part No.</label><input id="s_partno" placeholder="898385 7902"></div>
+      <div><label>Part Name</label><input id="s_partname" placeholder="SILL; ASM FLOOR RR"></div>
+      <div><label>RANK</label><input id="s_rank" placeholder="U"></div>
+      <div><label>Doc No.</label><input id="s_docno" placeholder="QA4-2-016"></div>
+      <div><label>Run No.</label><input id="s_runno" placeholder="SWC-RG01-028"></div>
+      <div><label>Rev.No</label><input id="s_revno" placeholder="3"></div>
+      <div><label>Rev.Date</label><input id="s_revdate" type="date"></div>
+      <div><label>Issue Form Date</label><input id="s_issuedate" type="date"></div>
+    </div>
+
+    <div class="sect-title">Config (JSON)</div>
+    <div class="hint" style="margin-bottom:6px">แก้ตัวเลข/label ตามเครื่องจริงได้เลย ระบบจะเช็ค JSON ให้ก่อนบันทึก ถ้าพิมพ์ผิดจะแจ้งเตือนไม่ให้บันทึก</div>
+    <textarea id="s_config" rows="14" style="width:100%;font-family:'SF Mono',Menlo,monospace;font-size:12.5px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#fbfcfd;"></textarea>
+
+    <div style="margin-top:14px;display:flex;gap:10px;">
+      <button class="btn gold" onclick="saveMachine()">💾 บันทึกเครื่องจักร</button>
+      <button class="btn" style="background:#fff;color:var(--navy);border:1px solid var(--line);" onclick="resetSetupForm()">+ เพิ่มเครื่องใหม่ (เคลียร์ฟอร์ม)</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>รายการเครื่องจักรทั้งหมด</h2>
+    <div id="machineList" class="empty">กำลังโหลด...</div>
   </div>
 </section>
 
@@ -190,429 +180,757 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ================= CONFIG: ใส่ค่า Supabase ของพี่บีตรงนี้ ================= */
+/* ============================================================
+   1) SUPABASE SETUP — ใส่ค่าจริงตรงนี้
+   ============================================================ */
 const SUPABASE_URL = 'https://rbydsetkjvvqbcrmpbli.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieWRzZXRranZ2cWJjcm1wYmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwMjA2NzcsImV4cCI6MjEwMjU5NjY3N30.plBFA5rVas_BlsLXmn0n8SH1EfN28wKq3iORGNxddrk';
-/* ========================================================================== */
+let db = null, configured = false;
+try{
+  if(SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_KEY !== 'YOUR_SUPABASE_ANON_KEY'){
+    db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    configured = true;
+    document.getElementById('setupNotice').style.display='none';
+    document.getElementById('connStatus').textContent = '🟢 เชื่อมต่อแล้ว';
+  } else {
+    document.getElementById('connStatus').textContent = '🟡 โหมดตัวอย่าง (mock data)';
+  }
+}catch(e){ document.getElementById('connStatus').textContent = '🔴 เชื่อมต่อไม่สำเร็จ'; }
 
-let db = null;
-let configured = SUPABASE_URL.startsWith('http') && SUPABASE_KEY.length > 20;
-if (configured) {
-  const { createClient } = supabase;
-  db = createClient(SUPABASE_URL, SUPABASE_KEY);
-  document.getElementById('connStatus').textContent = 'เชื่อมต่อ Supabase แล้ว ✅';
-  document.getElementById('setupNotice').style.display = 'none';
-} else {
-  document.getElementById('connStatus').textContent = 'ยังไม่ได้ตั้งค่า DB ⚠️';
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
 }
 
-const GUN_FIELDS = [
-  {key:'squeeze_time', tol:'squeeze_tol', act:'act_squeeze_time', label:'SQUZTIME (Sec.)'},
-  {key:'slope', tol:'slope_tol', act:'act_slope', label:'SLOPE (CYC)'},
-  {key:'weldtime', tol:'weldtime_tol', act:'act_weldtime', label:'WELDTIME (Sec.)'},
-  {key:'hold_time', tol:'hold_time_tol', act:'act_hold_time', label:'HOLD TIME (Sec.)'},
-  {key:'weld_current', tol:'weld_current_tol', act:'act_weld_current', label:'WELD CURRENT (kA)'},
-  {key:'tip_force', tol:'tip_force_tol', act:'act_tip_force', label:'TIP FORCE (kN)'},
-  {key:'tip_size', tol:null, act:'act_tip_size', label:'TIP (mm.)'},
+/* ============================================================
+   2) MOCK DATA — ใช้ตอนยังไม่ตั้งค่า Supabase (ลบทิ้งได้เมื่อต่อ DB จริงแล้ว)
+   ============================================================ */
+const MOCK_MACHINES = [
+  { id:1, family:'spot_nugget', machine_no:'RB168', part_name:'SILL; ASM FLOOR RR',
+    config:{ guns:["SERVO GUN"], std_sets:{ "SERVO GUN":[
+        {label:"STD#1",squeeze:30,slope:3,weld:5.0,hold:20,current:4.5,pressure:5.0,tip:16},
+        {label:"STD#2",squeeze:30,slope:1,weld:25,hold:20,current:8.5,pressure:5.0,tip:16}
+      ]}, time_unit:"sec", points:["A1","A2","B"], nugget_threshold_mm:4.2, driver_check:{style:"pallet",count:35} } },
+  { id:2, family:'spot_nugget', machine_no:'RB174', part_name:'RAIL ASM PUBX SIDE UPR, LH',
+    config:{ guns:["SERVO GUN"], std_sets:{ "SERVO GUN":[
+        {label:"Point# A,B,C · STD#1",squeeze:600,slope:60,weld:600,hold:200,current:3.5,pressure:2.0,tip:16},
+        {label:"Point# D · STD#1",squeeze:600,slope:80,weld:440,hold:200,current:3.0,pressure:2.5,tip:16}
+      ]}, time_unit:"ms", points:["A","C","B","D"], nugget_threshold_mm:4.2, driver_check:{style:"every_n",n:10,checkpoints:13} } },
+  { id:3, family:'spot_torque', machine_no:'SS20', part_name:'SILL SUB ASM FLOOR RR',
+    config:{ guns:["STATIONARY"], std_sets:{ "STATIONARY":[
+        {label:"CONDITION",squeeze:40,slope:1,weld:15,hold:30,current:12,pressure:4.0,tip:null}
+      ]}, time_unit:"sec", points:["A","B"], torque_threshold_kgfcm:831, driver_check:{style:"none"} } },
+  { id:4, family:'weld_length', machine_no:'WC-CIVIC-093', part_name:'BEAM, R FR DOOR SKIN LWR',
+    config:{ condition:{current:85,current_tol:20,volt:16,volt_tol:5,gas_flow:25,wire_dia:0.8,wire_type:"MT12"},
+      points:[1,2,3,4], length_std_min_mm:20, length_std_max_mm:25 } },
+  { id:5, family:'weld_hammer', machine_no:'—', part_name:'BRACKET; CRANK CASE',
+    config:{ condition:{current:125,current_tol:30,volt:20,volt_tol:15,gas_flow:18,gas_flow_tol:3,wire_dia:0.9,wire_type:"CO2"} } },
+  { id:6, family:'weld_zeroset', machine_no:'R176-R179', part_name:'FRAME ASM;PUBX GUARD OTR (REG)',
+    config:{ condition:{current:18,current_tol:3,gas_flow:0.9,wire_type:"CO2"},
+      time_slots:["08:00","13:00","17:30","20:00","01:00","05:30"], cadence:"weekly_or_daily" } }
 ];
-const NUGGET_POINTS = ['A1','A2','B'];
 
-/* ---------- Order state (edit vs new) ---------- */
-let currentRecordId = null; // null = กำลังเปิด Order ใหม่, มีค่า = กำลังแก้ไข/กรอกต่อ Lot เดิม
+const FAMILY_LABEL = {
+  spot_nugget: "🔩 สป๊อต · Nugget Test",
+  spot_torque: "🔩 สป๊อต · Test Torque",
+  weld_length: "🔧 เชื่อม · วัดความยาวแนวเชื่อม",
+  weld_hammer: "🔧 เชื่อม · ค้อนเคาะ + Visual",
+  weld_zeroset: "🔧 เชื่อม · Zero Set Log"
+};
+
+// Template เริ่มต้นต่อ family (ปรับมาจากตัวอย่างท้ายไฟล์ hybrid_schema.sql) — ให้พี่บีแก้ตัวเลข/label ต่อได้เลย
+const CONFIG_TEMPLATES = {
+  spot_nugget: {
+    guns: ["SERVO GUN #1", "SERVO GUN #2"],
+    std_sets: {
+      "SERVO GUN #1": [
+        {label:"STD#1", squeeze:30, slope:3, weld:5.0, hold:20, current:4.5, pressure:5.0, tip:16}
+      ],
+      "SERVO GUN #2": [
+        {label:"STD#1", squeeze:30, slope:1, weld:25, hold:20, current:8.5, pressure:5.0, tip:16}
+      ]
+    },
+    time_unit: "sec",
+    points: ["A1","A2","B"],
+    nugget_threshold_mm: 4.2,
+    driver_check: {style:"pallet", count:35}
+  },
+  spot_torque: {
+    guns: ["STATIONARY"],
+    std_sets: { "STATIONARY": [
+      {label:"CONDITION", squeeze:40, slope:1, weld:15, hold:30, current:12, pressure:4.0, tip:null}
+    ]},
+    time_unit: "sec",
+    points: ["A","B"],
+    torque_threshold_kgfcm: 831,
+    driver_check: {style:"none"}
+  },
+  weld_length: {
+    condition: {current:85, current_tol:20, volt:16, volt_tol:5, gas_flow:25, wire_dia:0.8, wire_type:"MT12"},
+    points: [1,2,3,4],
+    length_std_min_mm: 20,
+    length_std_max_mm: 25
+  },
+  weld_hammer: {
+    condition: {current:125, current_tol:30, volt:20, volt_tol:15, gas_flow:18, gas_flow_tol:3, wire_dia:0.9, wire_type:"CO2"}
+  },
+  weld_zeroset: {
+    condition: {current:18, current_tol:3, gas_flow:0.9, wire_type:"CO2"},
+    time_slots: ["08:00","13:00","17:30","20:00","01:00","05:30"],
+    cadence: "weekly_or_daily"
+  }
+};
+
+let editingMachineId = null; // null = กำลังเพิ่มเครื่องใหม่ / มีค่า = กำลังแก้ไขเครื่องเดิม
+
+let MACHINES = [];
+let currentMachine = null;
+let currentRecordId = null;   // null = กำลังเปิด Order ใหม่ / มีค่า = กำลังแก้ไข/กรอกต่อ Order เดิม
+
+function switchTab(tab){
+  document.getElementById('tab-form').style.display = tab==='form' ? 'block':'none';
+  document.getElementById('tab-history').style.display = tab==='history' ? 'block':'none';
+  document.getElementById('tab-setup').style.display = tab==='setup' ? 'block':'none';
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    const active = b.dataset.tab === tab;
+    b.classList.toggle('active', active);
+    b.style.background = active ? 'var(--navy)' : '#fff';
+    b.style.color = active ? '#fff' : 'var(--navy)';
+  });
+  if(tab==='history') loadHistory();
+  if(tab==='setup') renderMachineList();
+}
 
 function updateLotStatusBadge(status){
   const badge = document.getElementById('lotStatusBadge');
   const hint = document.getElementById('lotStatusHint');
   if(!currentRecordId){
-    badge.className = 'badge draft';
+    badge.className = 'family-badge'; badge.style.background='#fff6e0'; badge.style.color='var(--warn)';
     badge.textContent = '🆕 กำลังเปิด Order ใหม่';
-    hint.textContent = 'กรอก STD/ACT + Driver Check + Nugget (Start) แล้วบันทึก จากนั้นกลับมาที่แท็บ "ประวัติ" เพื่อเปิด Order นี้กรอก Middle/End ต่อภายหลัง';
-  } else if(status === 'submitted'){
-    badge.className = 'badge ok';
-    badge.textContent = '✅ Order #' + currentRecordId + ' — เสร็จสมบูรณ์ (แก้ไขเพิ่มได้)';
-    hint.textContent = 'Order นี้กรอกครบ Nugget End ทั้ง 3 จุดแล้ว ยังแก้ไขค่าย้อนหลังได้หากจำเป็น';
+    hint.textContent = 'กรอกข้อมูลแล้วกด "บันทึก" ได้เลย — กลับมากรอกต่อ (Middle/End) ได้ภายหลังจากแท็บ "ประวัติ / กรอกต่อ"';
   } else {
-    badge.className = 'badge draft';
-    badge.textContent = '🔄 กำลังแก้ไข Order #' + currentRecordId + ' (เปิดค้างอยู่)';
-    hint.textContent = 'กรอก Middle / End เพิ่มเติมได้เลย แล้วกดบันทึก — ไม่ต้องเปิด Order ใหม่';
+    const submitted = status === 'submitted';
+    badge.style.background = submitted ? '#eafaf1' : '#fff6e0';
+    badge.style.color = submitted ? 'var(--ok)' : 'var(--warn)';
+    badge.textContent = submitted ? `✅ Order #${currentRecordId} — เสร็จสมบูรณ์` : `🔄 Order #${currentRecordId} — กำลังกรอกต่อ`;
+    hint.textContent = 'กำลังแก้ไข/กรอกต่อ Order เดิม — บันทึกจะอัปเดตแถวเดิม ไม่สร้างซ้ำ';
   }
-}
-
-function clearInspectForm(){
-  const msg = currentRecordId
-    ? 'ล้างข้อมูลที่กรอกไว้ทั้งหมดในหน้านี้ และเลิกแก้ไข Order #' + currentRecordId + ' หรือไม่?'
-    : 'ล้างข้อมูลที่กรอกไว้ทั้งหมดในหน้านี้หรือไม่?';
-  if(!confirm(msg)) return;
-  startNewLot();
 }
 
 function startNewLot(){
   currentRecordId = null;
-  document.getElementById('ins_lotno').value = '';
-  document.getElementById('ins_inspector').value = '';
-  document.getElementById('ins_shift').value = '';
-  document.getElementById('ins_qty').value = '';
-  document.getElementById('ins_date').value = new Date().toISOString().slice(0,10);
-  palletState = {};
-  renderPalletGrid();
-  renderNuggetTable({});
-  renderGunTables();
+  document.getElementById('rec_lotno').value = '';
+  document.getElementById('rec_inspector').value = '';
+  document.getElementById('rec_shift').value = '';
+  document.getElementById('rec_date').value = new Date().toISOString().slice(0,10);
   updateLotStatusBadge();
-  toast('เริ่มเปิด Order ใหม่');
+  if(currentMachine) renderForm();
+  toast('เปิด Order ใหม่แล้วค่ะ');
 }
 
-async function loadRecordForEdit(recordId){
-  if(!configured) return;
-  const {data: rec, error} = await db.from('spot_records').select('*').eq('id', recordId).single();
-  if(error || !rec) return toast('โหลด Order ไม่สำเร็จ: ' + (error?.message||''));
-
-  // สลับไปแท็บ Inspect
-  document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
-  document.querySelector('.tab-btn[data-tab="inspect"]').classList.add('active');
-  ['setup','inspect','history'].forEach(t=>{
-    document.getElementById('tab-'+t).style.display = (t==='inspect')?'block':'none';
-  });
-
-  currentRecordId = rec.id;
-  document.getElementById('ins_machine').value = rec.machine_id;
-  document.getElementById('ins_lotno').value = rec.lot_no || '';
-  document.getElementById('ins_date').value = rec.record_date;
-  document.getElementById('ins_inspector').value = rec.inspector_name || '';
-  document.getElementById('ins_shift').value = rec.shift || '';
-  document.getElementById('ins_qty').value = rec.total_quantity || '';
-
-  // โหลด STD vs ACT (STD จากเครื่องจักร + ACT ที่เคยกรอกไว้)
-  const {data: actData} = await db.from('spot_gun_actual').select('*').eq('record_id', recordId);
-  const actMap = {};
-  (actData||[]).forEach(r=> actMap[r.gun_no]=r);
-  await renderGunTables(actMap);
-
-  // โหลด Driver Check
-  const {data: driverData} = await db.from('spot_driver_check').select('*').eq('record_id', recordId);
-  palletState = {};
-  (driverData||[]).forEach(r=> { if(r.result) palletState[r.pallet_no] = r.result; });
-  renderPalletGrid();
-
-  // โหลด Nugget Test
-  const {data: nugData} = await db.from('spot_nugget_test').select('*').eq('record_id', recordId);
-  const nugMap = {};
-  (nugData||[]).forEach(r=> nugMap[r.point]=r);
-  renderNuggetTable(nugMap);
-
-  updateLotStatusBadge(rec.status);
-  toast('เปิด Order #' + recordId + ' มากรอกต่อแล้ว');
-}
-
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2200);
-}
-
-/* ---------- Tabs ---------- */
-document.querySelectorAll('.tab-btn').forEach(b=>{
-  b.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    ['setup','inspect','history'].forEach(t=>{
-      document.getElementById('tab-'+t).style.display = (t===b.dataset.tab)?'block':'none';
-    });
-    if(b.dataset.tab==='history') loadHistory();
-    if(b.dataset.tab==='inspect') updateLotStatusBadge();
-  });
-});
-
-/* ---------- Machines: Setup ---------- */
-async function saveMachine(){
-  if(!configured) return toast('ยังไม่ได้ตั้งค่า Supabase ค่ะ');
-  const payload = {
-    machine_no: val('m_no'), model: val('m_model'), rank: val('m_rank'),
-    part_no: val('m_partno'), part_name: val('m_partname'),
-    doc_no: val('m_docno'), rev_no: val('m_revno'), rev_date: val('m_revdate')||null,
-    run_no: val('m_runno'), issue_form: val('m_issue')||null
-  };
-  if(!payload.machine_no || !payload.part_no || !payload.part_name){
-    return toast('กรอกอย่างน้อย เครื่องจักรเบอร์ / Part No. / Part Name ค่ะ');
-  }
-  const {error} = await db.from('spot_machines').insert([payload]);
-  if(error) return toast('บันทึกไม่สำเร็จ: '+error.message);
-  toast('บันทึกเครื่องจักรสำเร็จ ✅');
-  ['m_no','m_model','m_rank','m_partno','m_partname','m_docno','m_revno','m_revdate','m_runno','m_issue'].forEach(id=>document.getElementById(id).value='');
-  await loadMachines();
-}
-
-function val(id){ return document.getElementById(id).value.trim(); }
-
-let machinesCache = [];
+/* ============================================================
+   3) LOAD MACHINES — จาก Supabase จริง หรือ mock
+   ============================================================ */
 async function loadMachines(){
-  if(!configured) return;
-  const {data, error} = await db.from('spot_machines').select('*').eq('is_active', true).order('created_at',{ascending:false});
-  if(error) return toast('โหลดข้อมูลไม่สำเร็จ: '+error.message);
-  machinesCache = data || [];
-  const opts = m => `<option value="${m.id}">${m.machine_no} — ${m.part_name} (${m.part_no})</option>`;
-  document.getElementById('std_machine').innerHTML = machinesCache.map(opts).join('') || '<option>-- ไม่มีข้อมูล --</option>';
-  document.getElementById('ins_machine').innerHTML = machinesCache.map(opts).join('') || '<option>-- ไม่มีข้อมูล --</option>';
-
-  const listEl = document.getElementById('machineList');
-  listEl.innerHTML = machinesCache.length ? machinesCache.map(m=>`
-    <div class="hist-row" style="cursor:default">
-      <div>
-        <b>${m.machine_no}</b> · ${m.model||'-'} · RANK ${m.rank||'-'}
-        <div class="meta">Part: ${m.part_name} (${m.part_no}) · Doc: ${m.doc_no||'-'} Rev.${m.rev_no||'-'}</div>
-      </div>
-    </div>`).join('') : '<div class="empty">ยังไม่มีข้อมูล — เพิ่มเครื่องจักรด้านบนก่อนค่ะ</div>';
-
-  if(machinesCache.length){ loadStdForm(); renderGunTables(); }
-}
-
-async function loadStdForm(){
-  const machineId = document.getElementById('std_machine').value;
-  if(!machineId) return;
-  const {data} = await db.from('spot_gun_std').select('*').eq('machine_id', machineId);
-  const existing = {1:null,2:null};
-  (data||[]).forEach(r=> existing[r.gun_no]=r);
-
-  let html = '';
-  [1,2].forEach(gunNo=>{
-    const g = existing[gunNo] || {};
-    html += `<div class="sect-title">SERVO GUN #${gunNo}</div><div class="grid grid-3">`;
-    GUN_FIELDS.forEach(f=>{
-      html += `<div>
-        <label>${f.label} ${f.tol? '(± Tol.)':''}</label>
-        <div style="display:flex;gap:6px;">
-          <input type="number" step="0.01" id="std_${gunNo}_${f.key}" placeholder="ค่ากลาง" value="${g[f.key]??''}">
-          ${f.tol? `<input type="number" step="0.01" id="std_${gunNo}_${f.tol}" placeholder="±Tol" value="${g[f.tol]??''}" style="width:70px">` : ''}
-        </div>
-      </div>`;
-    });
-    html += `</div>`;
-  });
-  html += `<button class="btn gold" style="margin-top:14px" onclick="saveStd()">💾 บันทึกค่ามาตรฐาน STD</button>`;
-  document.getElementById('stdFormArea').innerHTML = html;
-}
-
-async function saveStd(){
-  const machineId = document.getElementById('std_machine').value;
-  if(!machineId) return toast('เลือกเครื่องจักรก่อนค่ะ');
-  for(const gunNo of [1,2]){
-    const row = {machine_id: Number(machineId), gun_no: gunNo};
-    GUN_FIELDS.forEach(f=>{
-      const v = document.getElementById(`std_${gunNo}_${f.key}`).value;
-      row[f.key] = v===''? null : Number(v);
-      if(f.tol){
-        const vt = document.getElementById(`std_${gunNo}_${f.tol}`).value;
-        row[f.tol] = vt===''? null : Number(vt);
-      }
-    });
-    const {error} = await db.from('spot_gun_std').upsert([row], {onConflict:'machine_id,gun_no'});
-    if(error) return toast('บันทึก STD ไม่สำเร็จ: '+error.message);
+  if(configured){
+    const {data, error} = await db.from('machines').select('*').eq('active', true);
+    if(error){ toast('โหลดเครื่องจักรไม่สำเร็จ: '+error.message); MACHINES = []; return; }
+    MACHINES = data || [];
+  } else {
+    MACHINES = MOCK_MACHINES;
   }
-  toast('บันทึกค่ามาตรฐานสำเร็จ ✅');
+  const sel = document.getElementById('machineSelect');
+  if(!MACHINES.length){ sel.innerHTML = '<option>ไม่มีข้อมูลเครื่องจักร</option>'; return; }
+  sel.innerHTML = MACHINES.map(m =>
+    `<option value="${m.id}">${m.machine_no||'-'} — ${m.part_name}</option>`
+  ).join('');
+  onMachineChange();
 }
 
-/* ---------- Inspection: Gun tables (STD vs ACT) ---------- */
-async function renderGunTables(actMap){
-  actMap = actMap || {};
-  const machineId = document.getElementById('ins_machine').value;
-  const area = document.getElementById('gunTablesArea');
-  if(!machineId || !configured){ area.innerHTML = '<div class="empty">เลือกเครื่องจักรก่อนเพื่อโหลดค่ามาตรฐาน</div>'; return; }
-  const {data} = await db.from('spot_gun_std').select('*').eq('machine_id', machineId);
-  if(!data || !data.length){ area.innerHTML = '<div class="empty">เครื่องนี้ยังไม่ได้ตั้งค่า STD — ไปที่แท็บ Setup ก่อนค่ะ</div>'; return; }
+let _loadingForEdit = false; // กันไม่ให้ onMachineChange รีเซ็ต currentRecordId ตอนโหลดมาแก้ไข
+function onMachineChange(){
+  const id = document.getElementById('machineSelect').value;
+  currentMachine = MACHINES.find(m => String(m.id) === String(id));
+  if(!currentMachine) return;
+  document.getElementById('familyBadgeArea').innerHTML =
+    `<span class="family-badge">${FAMILY_LABEL[currentMachine.family]}</span>`;
+  if(!_loadingForEdit){ currentRecordId = null; updateLotStatusBadge(); }
+  renderForm();
+}
 
-  let html = '';
-  [1,2].forEach(gunNo=>{
-    const g = data.find(r=>r.gun_no===gunNo);
-    if(!g) return;
-    const actRow = actMap[gunNo] || {};
-    html += `<div class="sect-title">SERVO GUN #${gunNo}</div>
-    <table class="gun-table">
-      <thead><tr><th>รายการ</th><th>STD</th><th>ACT</th><th>ผล</th></tr></thead>
-      <tbody>`;
-    GUN_FIELDS.forEach(f=>{
-      const stdTxt = f.tol ? `${g[f.key]??'-'} ± ${g[f.tol]??0}` : `${g[f.key]??'-'}`;
-      const actVal = actRow[f.act] ?? '';
-      html += `<tr>
-        <td>${f.label}</td>
-        <td class="std-cell">${stdTxt}</td>
-        <td><input type="number" step="0.01" class="act-input" id="act_${gunNo}_${f.key}" value="${actVal}"
-              data-std="${g[f.key]??''}" data-tol="${f.tol? (g[f.tol]??0):0}"
-              oninput="checkGunResult(${gunNo},'${f.key}')"></td>
-        <td id="res_${gunNo}_${f.key}">-</td>
+/* ============================================================
+   4) RENDER ROUTER
+   ============================================================ */
+function renderForm(){
+  const area = document.getElementById('formArea');
+  const saveArea = document.getElementById('saveArea');
+  const renderers = {
+    spot_nugget: renderSpotForm,
+    spot_torque: renderSpotForm,
+    weld_length: renderWeldLengthForm,
+    weld_hammer: renderWeldHammerForm,
+    weld_zeroset: renderWeldZerosetForm
+  };
+  area.innerHTML = renderers[currentMachine.family](currentMachine);
+  // Zero-set ไม่ผูก lot/order เลยซ่อนการ์ดข้อมูล Order และแถบสถานะ Lot แล้วใช้แค่วันที่
+  const isZeroset = currentMachine.family === 'weld_zeroset';
+  document.getElementById('orderInfoCard').style.display = isZeroset ? 'none' : 'block';
+  document.getElementById('lotStatusBar').style.display = isZeroset ? 'none' : 'flex';
+  saveArea.style.display = 'flex';
+}
+
+/* ---------- SPOT (nugget / torque ใช้ renderer ร่วมกัน) ---------- */
+function renderSpotForm(m){
+  const cfg = m.config;
+  const isNugget = m.family === 'spot_nugget';
+  const threshold = isNugget ? cfg.nugget_threshold_mm : cfg.torque_threshold_kgfcm;
+  const metricLabel = isNugget ? `Nugget Diameter (mm) — เกณฑ์ ≥ ${threshold}` : `Test Torque (kgf.cm) — เกณฑ์ ≥ ${threshold}`;
+
+  let html = `<div class="card"><h2>1) เงื่อนไข STD vs ACT</h2><div class="desc">หน่วยเวลา: ${cfg.time_unit}</div>`;
+  cfg.guns.forEach(gunLabel=>{
+    html += `<div class="sect-title">${gunLabel}</div><table class="gun-table"><tr>
+      <th>ชุดเงื่อนไข</th><th>Squeeze</th><th>Slope</th><th>Weld</th><th>Hold</th><th>Current</th><th>Pressure</th><th>Tip</th>
+    </tr>`;
+    (cfg.std_sets[gunLabel]||[]).forEach((std, idx)=>{
+      const gunKey = `${gunLabel}__${std.label}`.replace(/[^a-zA-Z0-9]/g,'_');
+      html += `<tr><td>${std.label}<div class="std-cell">STD</div></td>
+        <td>${std.squeeze}</td><td>${std.slope}</td><td>${std.weld}</td><td>${std.hold}</td>
+        <td>${std.current}</td><td>${std.pressure}</td><td>${std.tip ?? '-'}</td></tr>
+      <tr style="background:#fbfcfd" data-gun="${gunKey}" data-gun-label="${gunLabel} · ${std.label}">
+        <td style="text-align:right;font-size:11px;color:var(--muted)">ACT →</td>
+        <td><input class="act-input" data-f="squeeze" placeholder="${std.squeeze}"></td>
+        <td><input class="act-input" data-f="slope" placeholder="${std.slope}"></td>
+        <td><input class="act-input" data-f="weld" placeholder="${std.weld}"></td>
+        <td><input class="act-input" data-f="hold" placeholder="${std.hold}"></td>
+        <td><input class="act-input" data-f="current" placeholder="${std.current}"></td>
+        <td><input class="act-input" data-f="pressure" placeholder="${std.pressure}"></td>
+        <td><input class="act-input" data-f="tip" placeholder="${std.tip ?? ''}"></td>
       </tr>`;
     });
-    html += `</tbody></table>`;
+    html += `</table>`;
   });
-  area.innerHTML = html;
-  // แสดงผล PASS/FAIL ของค่าที่โหลดมาเดิม (ถ้ามี)
-  [1,2].forEach(gunNo=>{
-    GUN_FIELDS.forEach(f=>{
-      const inp = document.getElementById(`act_${gunNo}_${f.key}`);
-      if(inp && inp.value!=='') checkGunResult(gunNo, f.key);
-    });
+  html += `</div>`;
+
+  html += `<div class="card"><h2>2) ${metricLabel}</h2>
+    <table><tr><th>จุดตรวจ</th><th>Start</th><th>Middle</th><th>End</th><th>ผล</th></tr>`;
+  cfg.points.forEach(p=>{
+    html += `<tr><td><b>${p}</b></td>
+      <td><input type="number" step="0.01" class="act-input" id="pt_${p}_start" oninput="checkPoint('${p}', ${threshold})"></td>
+      <td><input type="number" step="0.01" class="act-input" id="pt_${p}_middle" oninput="checkPoint('${p}', ${threshold})"></td>
+      <td><input type="number" step="0.01" class="act-input" id="pt_${p}_end" oninput="checkPoint('${p}', ${threshold})"></td>
+      <td id="pt_${p}_result">-</td></tr>`;
   });
+  html += `</table></div>`;
+
+  html += `<div class="card"><h2>3) Driver Check</h2>${renderDriverCheck(cfg.driver_check)}</div>`;
+  return html;
 }
 
-function checkGunResult(gunNo, key){
-  const inp = document.getElementById(`act_${gunNo}_${key}`);
-  const resCell = document.getElementById(`res_${gunNo}_${key}`);
-  const std = parseFloat(inp.dataset.std), tol = parseFloat(inp.dataset.tol)||0;
-  const act = parseFloat(inp.value);
-  if(isNaN(act) || isNaN(std)){ resCell.innerHTML='-'; resCell.className=''; return; }
-  const ok = Math.abs(act-std) <= tol;
-  resCell.innerHTML = ok? '<span class="pass">✓ PASS</span>' : '<span class="fail">✕ FAIL</span>';
+function checkPoint(p, threshold){
+  const s = parseFloat(document.getElementById(`pt_${p}_start`).value);
+  const mid = parseFloat(document.getElementById(`pt_${p}_middle`).value);
+  const e = parseFloat(document.getElementById(`pt_${p}_end`).value);
+  const vals = [s,mid,e].filter(v=>!isNaN(v));
+  const cell = document.getElementById(`pt_${p}_result`);
+  if(!vals.length){ cell.innerHTML='-'; return; }
+  const ok = vals.every(v=>v>=threshold);
+  cell.innerHTML = ok? '<span class="pass">✓ PASS</span>' : `<span class="fail">✕ FAIL (&lt;${threshold})</span>`;
 }
 
-/* ---------- Inspection: Driver Check grid ---------- */
-let palletState = {}; // {1:'O',2:'X',...}
-function renderPalletGrid(){
-  const grid = document.getElementById('palletGrid');
-  let html = '';
-  for(let i=1;i<=35;i++){
-    const st = palletState[i] || '';
-    html += `<div class="pallet-btn ${st==='O'?'ok':st==='X'?'ng':''}" onclick="togglePallet(${i})">
-      <div class="num">#${i}</div><div class="mark">${st==='O'?'✓':st==='X'?'✕':'-'}</div>
-    </div>`;
+function renderDriverCheck(dc){
+  if(dc.style === 'none') return `<div class="hint">เครื่องนี้ไม่มี Driver Check (วัด Torque แทน)</div>`;
+  if(dc.style === 'pallet'){
+    let grid = '<div class="grid35" id="palletGrid">';
+    for(let i=1;i<=dc.count;i++) grid += `<div class="pallet-btn" data-label="${i}" onclick="togglePallet(this)"><div class="num">#${i}</div><div class="mark">-</div></div>`;
+    return grid + '</div><div class="hint">แตะเพื่อสลับ O / X / ว่าง</div>';
   }
-  grid.innerHTML = html;
-}
-function togglePallet(i){
-  const cur = palletState[i];
-  palletState[i] = (!cur)? 'O' : (cur==='O')? 'X' : '';
-  if(!palletState[i]) delete palletState[i];
-  renderPalletGrid();
-}
-
-/* ---------- Inspection: Nugget test ---------- */
-function renderNuggetTable(nugMap){
-  nugMap = nugMap || {};
-  const body = document.getElementById('nuggetBody');
-  body.innerHTML = NUGGET_POINTS.map(p=>{
-    const r = nugMap[p] || {};
-    return `
-    <tr>
-      <td><b>${p}</b></td>
-      <td><input type="number" step="0.01" class="act-input" id="nug_${p}_start" value="${r.start_val??''}" oninput="checkNugget('${p}')"></td>
-      <td><input type="number" step="0.01" class="act-input" id="nug_${p}_middle" value="${r.middle_val??''}" oninput="checkNugget('${p}')"></td>
-      <td><input type="number" step="0.01" class="act-input" id="nug_${p}_end" value="${r.end_val??''}" oninput="checkNugget('${p}')"></td>
-      <td id="nug_${p}_result">-</td>
-    </tr>`;
-  }).join('');
-  NUGGET_POINTS.forEach(p=> checkNugget(p));
-}
-function checkNugget(p){
-  const s = parseFloat(document.getElementById(`nug_${p}_start`).value);
-  const m = parseFloat(document.getElementById(`nug_${p}_middle`).value);
-  const e = parseFloat(document.getElementById(`nug_${p}_end`).value);
-  const vals = [s,m,e].filter(v=>!isNaN(v));
-  const resCell = document.getElementById(`nug_${p}_result`);
-  if(!vals.length){ resCell.innerHTML='-'; return; }
-  const ok = vals.every(v=>v>=4.2);
-  resCell.innerHTML = ok? '<span class="pass">✓ PASS</span>' : '<span class="fail">✕ FAIL (&lt;4.2mm)</span>';
+  if(dc.style === 'every_n'){
+    let grid = '<div class="grid35" id="palletGrid">';
+    for(let i=1;i<=dc.checkpoints;i++) grid += `<div class="pallet-btn" data-label="(${i})" onclick="togglePallet(this)"><div class="num">(${i})</div><div class="mark">-</div></div>`;
+    return grid + `</div><div class="hint">เช็คทุก ${dc.n} ชิ้น — รวม ${dc.checkpoints} จุดตรวจ</div>`;
+  }
+  return `<div class="empty">รูปแบบ driver_check ไม่รู้จัก: ${dc.style}</div>`;
 }
 
-/* ---------- Save full inspection record (เปิดใหม่ หรือ กรอกต่อ Order เดิม) ---------- */
-async function saveRecord(){
-  if(!configured) return toast('ยังไม่ได้ตั้งค่า Supabase ค่ะ');
-  const machineId = document.getElementById('ins_machine').value;
-  if(!machineId) return toast('เลือกเครื่องจักรก่อนค่ะ');
-  const recDate = document.getElementById('ins_date').value || new Date().toISOString().slice(0,10);
+function togglePallet(el){
+  const mark = el.querySelector('.mark');
+  const next = mark.textContent === '-' ? 'O' : (mark.textContent === 'O' ? 'X' : '-');
+  mark.textContent = next === 'O' ? '✓' : (next === 'X' ? '✕' : '-');
+  el.dataset.result = next;
+  el.classList.remove('ok','ng');
+  if(next==='O') el.classList.add('ok');
+  if(next==='X') el.classList.add('ng');
+}
 
-  // เตรียมข้อมูล nugget เพื่อคำนวณสถานะล่วงหน้า (submitted เมื่อ End ครบทั้ง 3 จุด)
-  const nuggetRows = [];
-  let endCompleteCount = 0;
-  NUGGET_POINTS.forEach(p=>{
-    const s = document.getElementById(`nug_${p}_start`).value;
-    const m = document.getElementById(`nug_${p}_middle`).value;
-    const e = document.getElementById(`nug_${p}_end`).value;
-    if(e!=='') endCompleteCount++;
-    if(s==='' && m==='' && e==='') return;
-    const vals = [s,m,e].filter(v=>v!=='').map(Number);
-    const result = vals.every(v=>v>=4.2) ? 'PASS':'FAIL';
-    nuggetRows.push({point:p, start_val:s||null, middle_val:m||null, end_val:e||null, result});
+/* ---------- WELD LENGTH ---------- */
+function renderWeldLengthForm(m){
+  const cfg = m.config;
+  let html = `<div class="card"><h2>เงื่อนไขการเชื่อม</h2>
+    <table><tr><th>Current</th><th>Volt</th><th>Gas Flow</th><th>Wire Dia.</th><th>Wire Type</th></tr>
+    <tr><td>${cfg.condition.current}±${cfg.condition.current_tol}</td><td>${cfg.condition.volt}±${cfg.condition.volt_tol}</td>
+    <td>${cfg.condition.gas_flow} L/M</td><td>Ø${cfg.condition.wire_dia}</td><td>${cfg.condition.wire_type}</td></tr></table></div>`;
+
+  html += `<div class="card"><h2>ความยาวแนวเชื่อม (มาตรฐาน ${cfg.length_std_min_mm}-${cfg.length_std_max_mm} mm)</h2>
+    <table><tr><th>จุด</th><th>Start (mm)</th><th>Middle (mm)</th><th>End (mm)</th></tr>`;
+  cfg.points.forEach(p=>{
+    html += `<tr data-point="${p}"><td><b>${p}</b></td>
+      <td><input type="number" step="0.1" class="act-input" data-stage="start"></td>
+      <td><input type="number" step="0.1" class="act-input" data-stage="middle"></td>
+      <td><input type="number" step="0.1" class="act-input" data-stage="end"></td></tr>`;
   });
-  const newStatus = (endCompleteCount === NUGGET_POINTS.length) ? 'submitted' : 'in_progress';
+  return html + `</table></div>`;
+}
 
-  const recordPayload = {
-    machine_id: Number(machineId),
-    lot_no: val('ins_lotno') || null,
+/* ---------- WELD HAMMER CHECK ---------- */
+function renderWeldHammerForm(m){
+  const cfg = m.config;
+  let html = `<div class="card"><h2>เงื่อนไขการเชื่อม</h2>
+    <table><tr><th>Current</th><th>Volt</th><th>Gas Flow</th><th>Wire Dia.</th><th>Wire Type</th></tr>
+    <tr><td>${cfg.condition.current}±${cfg.condition.current_tol}</td><td>${cfg.condition.volt}±${cfg.condition.volt_tol}</td>
+    <td>${cfg.condition.gas_flow}±${cfg.condition.gas_flow_tol} L/M</td><td>Ø${cfg.condition.wire_dia}</td><td>${cfg.condition.wire_type}</td></tr></table></div>`;
+
+  html += `<div class="card"><h2>ค้อนเคาะ + Visual Check</h2>
+    <table><tr><th>ช่วง</th><th>เวลา</th><th>ผล</th><th>LOT No.</th><th>ผู้ตรวจ</th></tr>`;
+  ['start','middle','end'].forEach(stage=>{
+    html += `<tr data-stage="${stage}"><td>${stage}</td>
+      <td><input type="time" class="act-input" style="width:90px" data-f="time"></td>
+      <td><select style="width:80px" data-f="result"><option value="">-</option><option>OK</option><option>NG</option></select></td>
+      <td><input class="act-input" style="width:90px" data-f="lot"></td>
+      <td><input class="act-input" style="width:100px" data-f="operator"></td></tr>`;
+  });
+  return html + `</table></div>`;
+}
+
+/* ---------- WELD ZERO-SET LOG ---------- */
+function renderWeldZerosetForm(m){
+  const cfg = m.config;
+  let html = `<div class="card"><h2>เงื่อนไขการเชื่อม (${cfg.cadence})</h2>
+    <table><tr><th>Current</th><th>Gas Flow</th><th>Wire Type</th></tr>
+    <tr><td>${cfg.condition.current}±${cfg.condition.current_tol}</td><td>${cfg.condition.gas_flow}</td><td>${cfg.condition.wire_type}</td></tr></table></div>`;
+
+  html += `<div class="card"><h2>Zero Set Log</h2>
+    <div class="grid grid-3"><div><label>วันที่</label><input id="zs_date" type="date"></div>
+    <div><label>ผู้ตรวจ (ค่าเริ่มต้นทุกแถว)</label><input id="zs_operator_default"></div></div>
+    <table style="margin-top:12px"><tr><th>เวลา</th><th>ค่า (ว่าง = ไม่เปลี่ยน)</th><th>ผู้ตรวจ</th></tr>`;
+  cfg.time_slots.forEach(t=>{
+    html += `<tr data-slot="${t}"><td><b>${t}</b></td>
+      <td><input class="act-input" placeholder="-" data-f="value"></td>
+      <td><input class="act-input" style="width:100px" data-f="operator"></td></tr>`;
+  });
+  return html + `</table></div>`;
+}
+
+/* ============================================================
+   5) SAVE — router ตาม family
+   ============================================================ */
+async function saveRecord(){
+  if(!configured){ toast('โหมดตัวอย่าง — ยังไม่ได้ต่อ Supabase จริง (ดูวิธีตั้งค่าด้านบน)'); return; }
+  if(!currentMachine){ toast('เลือกเครื่องจักรก่อนค่ะ'); return; }
+
+  const savers = {
+    spot_nugget: saveSpotRecord,
+    spot_torque: saveSpotRecord,
+    weld_length: saveWeldLengthRecord,
+    weld_hammer: saveWeldHammerRecord,
+    weld_zeroset: saveWeldZerosetRecord
+  };
+  await savers[currentMachine.family]();
+}
+
+// สร้าง/อัปเดต header ของ inspection_records — ใช้ร่วมกันทุก family ยกเว้น zeroset
+// ถ้ามี currentRecordId อยู่แล้ว (กำลังกรอกต่อ/แก้ไข Order เดิม) จะ UPDATE แถวเดิม
+// ถ้าไม่มี จะ INSERT แถวใหม่ แล้วจำ id ไว้เป็น currentRecordId ต่อจากนี้
+async function upsertInspectionRecord(status){
+  const recDate = document.getElementById('rec_date').value || new Date().toISOString().slice(0,10);
+  const payload = {
+    machine_id: currentMachine.id,
+    lot_no: document.getElementById('rec_lotno').value || null,
     record_date: recDate,
-    inspector_name: val('ins_inspector'),
-    shift: document.getElementById('ins_shift').value,
-    total_quantity: document.getElementById('ins_qty').value || null,
-    status: newStatus,
+    inspector_name: document.getElementById('rec_inspector').value || null,
+    shift: document.getElementById('rec_shift').value || null,
+    status: status || 'in_progress',
     updated_at: new Date().toISOString()
   };
-
-  let recordId = currentRecordId;
-  if(!recordId){
-    const {data: recData, error: recErr} = await db.from('spot_records').insert([recordPayload]).select().single();
-    if(recErr) return toast('บันทึกไม่สำเร็จ: '+recErr.message);
-    recordId = recData.id;
-    currentRecordId = recordId;
-  } else {
-    const {error: updErr} = await db.from('spot_records').update(recordPayload).eq('id', recordId);
-    if(updErr) return toast('บันทึกไม่สำเร็จ: '+updErr.message);
+  if(currentRecordId){
+    const {error} = await db.from('inspection_records').update(payload).eq('id', currentRecordId);
+    if(error){ toast('บันทึก Order ไม่สำเร็จ: '+error.message); return null; }
+    return currentRecordId;
   }
+  const {data, error} = await db.from('inspection_records').insert([payload]).select().single();
+  if(error){ toast('บันทึก Order ไม่สำเร็จ: '+error.message); return null; }
+  currentRecordId = data.id;
+  return data.id;
+}
 
-  // gun actual (upsert กันซ้ำ ถ้าเคยกรอกไว้แล้วมาแก้)
+async function saveSpotRecord(){
+  // เช็คสถานะล่วงหน้า: submitted เมื่อกรอก "End" ครบทุกจุดตรวจแล้ว (เหมือน Gen1)
+  const pointsAll = currentMachine.config.points;
+  const endCompleteCount = pointsAll.filter(p=>{
+    const el = document.getElementById(`pt_${p}_end`);
+    return el && el.value !== '';
+  }).length;
+  const status = endCompleteCount === pointsAll.length ? 'submitted' : 'in_progress';
+
+  const recordId = await upsertInspectionRecord(status);
+  if(!recordId) return;
+
+  // 1) gun actual
   const gunRows = [];
-  [1,2].forEach(gunNo=>{
-    const row = {record_id: recordId, gun_no: gunNo};
+  document.querySelectorAll('#formArea tr[data-gun]').forEach(tr=>{
+    const label = tr.dataset.gunLabel;
+    const row = {record_id: recordId, gun_label: label, time_unit: currentMachine.config.time_unit};
     let hasAny = false;
-    GUN_FIELDS.forEach(f=>{
-      const el = document.getElementById(`act_${gunNo}_${f.key}`);
-      if(el && el.value!==''){ row[f.act]=Number(el.value); hasAny = true; }
+    tr.querySelectorAll('input[data-f]').forEach(inp=>{
+      const field = inp.dataset.f;
+      if(inp.value !== ''){
+        const key = field === 'squeeze' ? 'act_squeeze' : field === 'slope' ? 'act_slope' :
+                    field === 'weld' ? 'act_weld' : field === 'hold' ? 'act_hold' :
+                    field === 'current' ? 'act_current' : field === 'pressure' ? 'act_pressure' : 'act_tip';
+        row[key] = field === 'tip' ? inp.value : Number(inp.value);
+        hasAny = true;
+      }
     });
     if(hasAny) gunRows.push(row);
   });
   if(gunRows.length){
-    const {error} = await db.from('spot_gun_actual').upsert(gunRows, {onConflict:'record_id,gun_no'});
-    if(error) return toast('บันทึก STD/ACT ไม่สำเร็จ: '+error.message);
+    const {error} = await db.from('inspection_gun_actual').upsert(gunRows, {onConflict:'record_id,gun_label'});
+    if(error) return toast('บันทึก Gun Actual ไม่สำเร็จ: '+error.message);
   }
 
-  // driver check (upsert ทีละ pallet ที่แตะไว้)
-  const palletRows = Object.entries(palletState).map(([no,res])=>({record_id:recordId, pallet_no:Number(no), result:res}));
-  if(palletRows.length){
-    const {error} = await db.from('spot_driver_check').upsert(palletRows, {onConflict:'record_id,pallet_no'});
+  // 2) point results (nugget หรือ torque)
+  const isNugget = currentMachine.family === 'spot_nugget';
+  const threshold = isNugget ? currentMachine.config.nugget_threshold_mm : currentMachine.config.torque_threshold_kgfcm;
+  const metricType = isNugget ? 'nugget_mm' : 'torque_kgfcm';
+  const pointRows = [];
+  currentMachine.config.points.forEach(p=>{
+    ['start','middle','end'].forEach(stage=>{
+      const el = document.getElementById(`pt_${p}_${stage}`);
+      if(el && el.value !== ''){
+        const val = Number(el.value);
+        pointRows.push({
+          record_id: recordId, gun_label: '', point_label: String(p), stage, metric_type: metricType,
+          value: val, std_min: threshold, result: val >= threshold ? 'PASS' : 'FAIL'
+        });
+      }
+    });
+  });
+  if(pointRows.length){
+    const {error} = await db.from('inspection_point_results').upsert(pointRows, {onConflict:'record_id,gun_label,point_label,stage'});
+    if(error) return toast('บันทึกผลตรวจไม่สำเร็จ: '+error.message);
+  }
+
+  // 3) driver check
+  const dcRows = [];
+  document.querySelectorAll('#palletGrid .pallet-btn').forEach(btn=>{
+    if(btn.dataset.result === 'O' || btn.dataset.result === 'X'){
+      dcRows.push({record_id: recordId, point_label: '', check_label: btn.dataset.label, result: btn.dataset.result});
+    }
+  });
+  if(dcRows.length){
+    const {error} = await db.from('inspection_driver_check').upsert(dcRows, {onConflict:'record_id,point_label,check_label'});
     if(error) return toast('บันทึก Driver Check ไม่สำเร็จ: '+error.message);
   }
 
-  // nugget test (upsert ทีละจุด)
-  if(nuggetRows.length){
-    const rowsWithRecord = nuggetRows.map(r=>({...r, record_id: recordId}));
-    const {error} = await db.from('spot_nugget_test').upsert(rowsWithRecord, {onConflict:'record_id,point'});
-    if(error) return toast('บันทึก Nugget Test ไม่สำเร็จ: '+error.message);
-  }
-
-  updateLotStatusBadge(newStatus);
-  toast(newStatus==='submitted' ? '✅ บันทึกสำเร็จ — Order นี้ครบ Nugget End แล้ว' : '💾 บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
+  updateLotStatusBadge(status);
+  toast(status==='submitted' ? '✅ บันทึกสำเร็จ — Order นี้ครบ End แล้ว' : '💾 บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
 }
 
-/* ---------- History ---------- */
+async function saveWeldLengthRecord(){
+  const cfg0 = currentMachine.config;
+  const pointsAll = cfg0.points;
+  const endCompleteCount = pointsAll.filter(p=>{
+    const tr = document.querySelector(`#formArea tr[data-point="${p}"]`);
+    const el = tr && tr.querySelector('input[data-stage="end"]');
+    return el && el.value !== '';
+  }).length;
+  const status = endCompleteCount === pointsAll.length ? 'submitted' : 'in_progress';
+
+  const recordId = await upsertInspectionRecord(status);
+  if(!recordId) return;
+  const cfg = currentMachine.config;
+  const rows = [];
+  document.querySelectorAll('#formArea tr[data-point]').forEach(tr=>{
+    const point = tr.dataset.point;
+    tr.querySelectorAll('input[data-stage]').forEach(inp=>{
+      if(inp.value !== ''){
+        const val = Number(inp.value);
+        const ok = val >= cfg.length_std_min_mm && val <= cfg.length_std_max_mm;
+        rows.push({
+          record_id: recordId, gun_label: '', point_label: point, stage: inp.dataset.stage, metric_type: 'weld_length_mm',
+          value: val, std_min: cfg.length_std_min_mm, std_max: cfg.length_std_max_mm, result: ok ? 'PASS':'FAIL'
+        });
+      }
+    });
+  });
+  if(rows.length){
+    const {error} = await db.from('inspection_point_results').upsert(rows, {onConflict:'record_id,gun_label,point_label,stage'});
+    if(error) return toast('บันทึกไม่สำเร็จ: '+error.message);
+  }
+  updateLotStatusBadge(status);
+  toast(status==='submitted' ? '✅ บันทึกสำเร็จ — Order นี้ครบ End แล้ว' : '💾 บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
+}
+
+async function saveWeldHammerRecord(){
+  const endEl = document.querySelector('#formArea tr[data-stage="end"] [data-f="result"]');
+  const status = (endEl && endEl.value) ? 'submitted' : 'in_progress';
+  const recordId = await upsertInspectionRecord(status);
+  if(!recordId) return;
+  const rows = [];
+  document.querySelectorAll('#formArea tr[data-stage]').forEach(tr=>{
+    const stage = tr.dataset.stage;
+    const get = f => tr.querySelector(`[data-f="${f}"]`)?.value || null;
+    if(get('result')){
+      rows.push({
+        record_id: recordId, stage, check_time: get('time') || null,
+        visual_result: get('result'), lot_no: get('lot'), operator_name: get('operator')
+      });
+    }
+  });
+  if(rows.length){
+    // ลบของเดิมของ record นี้ก่อนแล้วค่อย insert ใหม่ (ตาราง weld_hammer_check ไม่มี unique constraint ต่อ stage
+    // ถ้าไม่ลบก่อน กด "บันทึก" ซ้ำจะได้แถวซ้ำเรื่อยๆ)
+    if(currentRecordId){
+      await db.from('weld_hammer_check').delete().eq('record_id', currentRecordId);
+    }
+    const {error} = await db.from('weld_hammer_check').insert(rows);
+    if(error) return toast('บันทึกไม่สำเร็จ: '+error.message);
+  }
+  updateLotStatusBadge(status);
+  toast(status==='submitted' ? '✅ บันทึกสำเร็จ — Order นี้ครบ End แล้ว' : '💾 บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
+}
+
+async function saveWeldZerosetRecord(){
+  const logDate = document.getElementById('zs_date').value || new Date().toISOString().slice(0,10);
+  const defaultOp = document.getElementById('zs_operator_default').value || null;
+  const rows = [];
+  document.querySelectorAll('#formArea tr[data-slot]').forEach(tr=>{
+    const slot = tr.dataset.slot;
+    const value = tr.querySelector('[data-f="value"]').value || null;
+    const operator = tr.querySelector('[data-f="operator"]').value || defaultOp;
+    rows.push({machine_id: currentMachine.id, log_date: logDate, time_slot: slot, value, operator_name: operator});
+  });
+  const {error} = await db.from('weld_zeroset_log').upsert(rows, {onConflict:'machine_id,log_date,time_slot'});
+  if(error) return toast('บันทึกไม่สำเร็จ: '+error.message);
+  toast('✅ บันทึกสำเร็จ');
+}
+
+/* ============================================================
+   6) HISTORY — ดูรายการ Order เดิม + กรอกต่อ/แก้ไข โดยไม่สร้างซ้ำ
+   ============================================================ */
 async function loadHistory(){
-  if(!configured) return;
-  const {data, error} = await db.from('spot_records')
-    .select('*, spot_machines(machine_no, part_name, part_no)')
-    .order('created_at',{ascending:false}).limit(50);
   const el = document.getElementById('historyList');
-  if(error){ el.innerHTML = '<div class="empty">โหลดไม่สำเร็จ: '+error.message+'</div>'; return; }
+  if(!configured){ el.innerHTML = '<div class="empty">โหมดตัวอย่าง — ยังไม่ได้ต่อ Supabase จริง</div>'; return; }
+  el.innerHTML = '<div class="empty">กำลังโหลด...</div>';
+  const {data, error} = await db.from('inspection_records')
+    .select('*, machines(machine_no, part_name, family)')
+    .order('updated_at', {ascending:false}).limit(50);
+  if(error){ el.innerHTML = 'โหลดไม่สำเร็จ: '+error.message; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">ยังไม่มีประวัติการตรวจสอบ</div>'; return; }
   el.innerHTML = data.map(r=>`
     <div class="hist-row" onclick="loadRecordForEdit(${r.id})">
       <div>
-        <b>${r.spot_machines?.machine_no||'-'}</b> · ${r.spot_machines?.part_name||'-'} ${r.lot_no? ' · Order No.: '+r.lot_no : ''}
-        <div class="meta">${r.record_date} · ผู้ตรวจ: ${r.inspector_name||'-'} · กะ: ${r.shift||'-'} · จำนวน: ${r.total_quantity||'-'}</div>
+        <b>${r.machines?.machine_no||'-'}</b> · ${r.machines?.part_name||'-'}
+        ${r.lot_no ? ' · Order No.: '+r.lot_no : ''}
+        <span class="family-badge">${FAMILY_LABEL[r.machines?.family]||r.machines?.family||''}</span>
+        <div class="meta">${r.record_date} · ผู้ตรวจ: ${r.inspector_name||'-'} · กะ: ${r.shift||'-'}</div>
       </div>
-      <span class="badge ${r.status==='submitted'?'ok':'draft'}">${r.status==='submitted'?'✅ เสร็จสมบูรณ์':'🔄 เปิดอยู่'}</span>
+      <span class="badge ${r.status==='submitted'?'ok':'draft'}">${r.status==='submitted'?'✅ เสร็จสมบูรณ์':'🔄 กำลังกรอก'}</span>
     </div>`).join('');
 }
 
-/* ---------- Init ---------- */
-document.getElementById('ins_date').value = new Date().toISOString().slice(0,10);
-renderNuggetTable();
-renderPalletGrid();
-updateLotStatusBadge();
-if(configured) loadMachines();
+async function loadRecordForEdit(recordId){
+  if(!configured) return;
+  const {data: rec, error} = await db.from('inspection_records').select('*').eq('id', recordId).single();
+  if(error){ toast('โหลด Order ไม่สำเร็จ: '+error.message); return; }
+
+  // รอ MACHINES โหลดเสร็จก่อน (เผื่อยังไม่เคยโหลด)
+  if(!MACHINES.length) await loadMachines();
+  const machine = MACHINES.find(m => String(m.id) === String(rec.machine_id));
+  if(!machine){ toast('ไม่พบข้อมูลเครื่องจักรของ Order นี้'); return; }
+
+  currentRecordId = rec.id;
+  currentMachine = machine;
+  _loadingForEdit = true;
+  document.getElementById('machineSelect').value = machine.id;
+  document.getElementById('familyBadgeArea').innerHTML = `<span class="family-badge">${FAMILY_LABEL[machine.family]}</span>`;
+  document.getElementById('rec_lotno').value = rec.lot_no || '';
+  document.getElementById('rec_date').value = rec.record_date || '';
+  document.getElementById('rec_inspector').value = rec.inspector_name || '';
+  document.getElementById('rec_shift').value = rec.shift || '';
+  renderForm();
+  _loadingForEdit = false;
+  updateLotStatusBadge(rec.status);
+
+  await populateFormFromRecord(machine.family, recordId);
+  switchTab('form');
+  toast('โหลด Order เดิมแล้ว — แก้ไข/กรอกต่อได้เลยค่ะ');
+}
+
+// เติมค่าเดิมกลับเข้าฟอร์มตาม family
+async function populateFormFromRecord(family, recordId){
+  if(family === 'spot_nugget' || family === 'spot_torque'){
+    const [gunRes, ptRes, dcRes] = await Promise.all([
+      db.from('inspection_gun_actual').select('*').eq('record_id', recordId),
+      db.from('inspection_point_results').select('*').eq('record_id', recordId),
+      db.from('inspection_driver_check').select('*').eq('record_id', recordId)
+    ]);
+    (gunRes.data||[]).forEach(g=>{
+      document.querySelectorAll(`#formArea tr[data-gun-label]`).forEach(tr=>{
+        if(tr.dataset.gunLabel !== g.gun_label) return;
+        const set = (f,v)=>{ const i = tr.querySelector(`input[data-f="${f}"]`); if(i && v!=null) i.value = v; };
+        set('squeeze', g.act_squeeze); set('slope', g.act_slope); set('weld', g.act_weld);
+        set('hold', g.act_hold); set('current', g.act_current); set('pressure', g.act_pressure); set('tip', g.act_tip);
+      });
+    });
+    (ptRes.data||[]).forEach(pt=>{
+      const el = document.getElementById(`pt_${pt.point_label}_${pt.stage}`);
+      if(el){ el.value = pt.value; checkPoint(pt.point_label, pt.std_min); }
+    });
+    (dcRes.data||[]).forEach(dc=>{
+      const btn = document.querySelector(`#palletGrid .pallet-btn[data-label="${dc.check_label}"]`);
+      if(btn){
+        btn.dataset.result = dc.result;
+        btn.querySelector('.mark').textContent = dc.result==='O' ? '✓' : '✕';
+        btn.classList.add(dc.result==='O' ? 'ok' : 'ng');
+      }
+    });
+  } else if(family === 'weld_length'){
+    const {data} = await db.from('inspection_point_results').select('*').eq('record_id', recordId);
+    (data||[]).forEach(pt=>{
+      const tr = document.querySelector(`#formArea tr[data-point="${pt.point_label}"]`);
+      const inp = tr && tr.querySelector(`input[data-stage="${pt.stage}"]`);
+      if(inp) inp.value = pt.value;
+    });
+  } else if(family === 'weld_hammer'){
+    const {data} = await db.from('weld_hammer_check').select('*').eq('record_id', recordId);
+    (data||[]).forEach(row=>{
+      const tr = document.querySelector(`#formArea tr[data-stage="${row.stage}"]`);
+      if(!tr) return;
+      const set = (f,v)=>{ const i = tr.querySelector(`[data-f="${f}"]`); if(i && v!=null) i.value = v; };
+      set('time', row.check_time); set('result', row.visual_result); set('lot', row.lot_no); set('operator', row.operator_name);
+    });
+  }
+  // weld_zeroset ไม่ผูก record_id (ผูกกับ machine+วันที่แทน) จึงไม่ต้อง populate ผ่านทางนี้
+}
+
+/* ============================================================
+   7) SETUP — เพิ่ม/แก้ไข/ลบเครื่องจักร (machines table)
+   ============================================================ */
+function loadConfigTemplate(){
+  // โหลด template เฉพาะตอน "เพิ่มเครื่องใหม่" เท่านั้น — ถ้ากำลังแก้ไขเครื่องเดิมอยู่ ไม่ทับ config ที่โหลดมา
+  if(editingMachineId) return;
+  const family = document.getElementById('s_family').value;
+  document.getElementById('s_config').value = JSON.stringify(CONFIG_TEMPLATES[family], null, 2);
+}
+
+function resetSetupForm(){
+  editingMachineId = null;
+  document.getElementById('setupFormTitle').textContent = 'เพิ่มเครื่องจักร / Part ใหม่';
+  ['s_customer','s_model','s_machineno','s_partno','s_partname','s_rank','s_docno','s_runno','s_revno','s_revdate','s_issuedate']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('s_family').value = 'spot_nugget';
+  loadConfigTemplate();
+}
+
+async function saveMachine(){
+  if(!configured){ toast('โหมดตัวอย่าง — ยังไม่ได้ต่อ Supabase จริง'); return; }
+  const partNo = document.getElementById('s_partno').value.trim();
+  const partName = document.getElementById('s_partname').value.trim();
+  if(!partNo || !partName){ toast('กรอก Part No. และ Part Name ก่อนค่ะ'); return; }
+
+  let config;
+  try{
+    config = JSON.parse(document.getElementById('s_config').value);
+  }catch(e){
+    toast('❌ Config JSON ผิดรูปแบบ — เช็คเครื่องหมาย , หรือ { } ให้ครบ: '+e.message);
+    return;
+  }
+
+  const payload = {
+    family: document.getElementById('s_family').value,
+    customer: document.getElementById('s_customer').value || null,
+    model: document.getElementById('s_model').value || null,
+    machine_no: document.getElementById('s_machineno').value || null,
+    part_no: partNo,
+    part_name: partName,
+    rank: document.getElementById('s_rank').value || null,
+    doc_no: document.getElementById('s_docno').value || null,
+    run_no: document.getElementById('s_runno').value || null,
+    rev_no: document.getElementById('s_revno').value || null,
+    rev_date: document.getElementById('s_revdate').value || null,
+    issue_form_date: document.getElementById('s_issuedate').value || null,
+    config,
+    updated_at: new Date().toISOString()
+  };
+
+  if(editingMachineId){
+    const {error} = await db.from('machines').update(payload).eq('id', editingMachineId);
+    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
+    toast('✅ แก้ไขเครื่องจักรสำเร็จ');
+  } else {
+    const {error} = await db.from('machines').insert([payload]);
+    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
+    toast('✅ เพิ่มเครื่องจักรใหม่สำเร็จ');
+  }
+  resetSetupForm();
+  await loadMachines();       // รีเฟรช dropdown เลือกเครื่องในแท็บกรอกฟอร์มด้วย
+  renderMachineList();
+}
+
+function renderMachineList(){
+  const el = document.getElementById('machineList');
+  if(!MACHINES.length){ el.innerHTML = '<div class="empty">ยังไม่มีเครื่องจักร — เพิ่มจากฟอร์มด้านบนได้เลยค่ะ</div>'; return; }
+  el.innerHTML = MACHINES.map(m => `
+    <div class="hist-row" style="cursor:default">
+      <div>
+        <b>${m.machine_no || '-'}</b> · ${m.part_name}
+        <span class="family-badge">${FAMILY_LABEL[m.family] || m.family}</span>
+        <div class="meta">Part No.: ${m.part_no || '-'} ${m.customer ? ' · ลูกค้า: '+m.customer : ''}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn" style="background:#fff;color:var(--navy);border:1px solid var(--line);padding:6px 10px;font-size:12px;" onclick="editMachine(${m.id})">✏️ แก้ไข</button>
+        <button class="btn" style="background:#fff;color:var(--fail);border:1px solid var(--line);padding:6px 10px;font-size:12px;" onclick="deleteMachine(${m.id})">🗑️ ลบ</button>
+      </div>
+    </div>`).join('');
+}
+
+function editMachine(id){
+  const m = MACHINES.find(x => String(x.id) === String(id));
+  if(!m) return;
+  editingMachineId = m.id;
+  document.getElementById('setupFormTitle').textContent = `แก้ไขเครื่องจักร #${m.id} — ${m.machine_no || m.part_name}`;
+  document.getElementById('s_family').value = m.family;
+  document.getElementById('s_customer').value = m.customer || '';
+  document.getElementById('s_model').value = m.model || '';
+  document.getElementById('s_machineno').value = m.machine_no || '';
+  document.getElementById('s_partno').value = m.part_no || '';
+  document.getElementById('s_partname').value = m.part_name || '';
+  document.getElementById('s_rank').value = m.rank || '';
+  document.getElementById('s_docno').value = m.doc_no || '';
+  document.getElementById('s_runno').value = m.run_no || '';
+  document.getElementById('s_revno').value = m.rev_no || '';
+  document.getElementById('s_revdate').value = m.rev_date || '';
+  document.getElementById('s_issuedate').value = m.issue_form_date || '';
+  document.getElementById('s_config').value = JSON.stringify(m.config, null, 2);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+async function deleteMachine(id){
+  if(!configured) return;
+  if(!confirm('ลบเครื่องจักรนี้แน่ใจไหมคะ? (ถ้ามีประวัติการตรวจสอบผูกอยู่ อาจลบไม่ได้เพราะติด foreign key)')) return;
+  const {error} = await db.from('machines').delete().eq('id', id);
+  if(error){ toast('ลบไม่สำเร็จ: '+error.message); return; }
+  toast('🗑️ ลบเครื่องจักรแล้ว');
+  if(editingMachineId === id) resetSetupForm();
+  await loadMachines();
+  renderMachineList();
+}
+
+/* ---------- INIT ---------- */
+document.getElementById('rec_date').value = new Date().toISOString().slice(0,10);
+loadConfigTemplate();
+loadMachines();
 </script>
 </body>
 </html>
