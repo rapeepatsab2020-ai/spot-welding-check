@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spot Welding Check | Summit Auto Body</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0b2540; --navy2:#123a63; --gold:#c9a227; --gold-l:#e8cf7a;
+    --bg:#f3f5f8; --card:#ffffff; --line:#e2e6ec; --text:#1c2733; --muted:#6b7686;
+    --ok:#1e8e5a; --fail:#c0392b; --warn:#b8860b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Noto Sans Thai',sans-serif;background:var(--bg);color:var(--text);}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px;}
+  header .sub{font-size:12px;color:var(--gold-l);margin-top:2px;}
+  nav{display:flex;gap:8px;padding:12px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:10;}
+  nav button{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
+  nav button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  nav button:hover:not(.active){border-color:var(--gold);}
+  main{max-width:1100px;margin:0 auto;padding:20px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .card h2{font-size:16px;margin:0 0 14px;color:var(--navy);border-left:4px solid var(--gold);padding-left:10px;}
+  .grid{display:grid;gap:12px;}
+  .grid-2{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:1fr 1fr 1fr;}
+  @media(max-width:700px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+  label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:600;}
+  input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:14px;background:#fbfcfd;}
+  input:focus,select:focus{outline:none;border-color:var(--navy2);background:#fff;}
+  .btn{background:var(--navy);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;}
+  .btn:hover{background:var(--navy2);}
+  .btn.gold{background:var(--gold);color:var(--navy);}
+  .btn.gold:hover{background:var(--gold-l);}
+  .btn.ghost{background:#fff;color:var(--navy);border:1px solid var(--line);}
+  .btn.small{padding:6px 10px;font-size:12px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:center;}
+  th{background:#f0f3f7;color:var(--navy);font-weight:700;}
+  .gun-table td:first-child, .gun-table th:first-child{text-align:left;background:#f7f9fb;font-weight:600;width:130px;}
+  .std-cell{color:var(--muted);font-size:12px;}
+  .act-input{width:70px;padding:5px;text-align:center;}
+  .pass{color:var(--ok);font-weight:700;}
+  .fail{color:var(--fail);font-weight:700;background:#fdecea;}
+  .grid35{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;margin-top:8px;}
+  .pallet-btn{border:1px solid var(--line);border-radius:7px;padding:8px 4px;text-align:center;cursor:pointer;font-size:12px;background:#fbfcfd;user-select:none;}
+  .pallet-btn .num{font-size:11px;color:var(--muted);}
+  .pallet-btn .mark{font-size:16px;font-weight:800;}
+  .pallet-btn.ok{background:#eafaf1;border-color:var(--ok);color:var(--ok);}
+  .pallet-btn.ng{background:#fdecea;border-color:var(--fail);color:var(--fail);}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
+  .badge.ok{background:#eafaf1;color:var(--ok);}
+  .badge.ng{background:#fdecea;color:var(--fail);}
+  .badge.draft{background:#fff6e0;color:var(--warn);}
+  .hist-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:#fbfcfd;cursor:pointer;}
+  .hist-row:hover{border-color:var(--navy2);}
+  .hist-row .meta{font-size:12px;color:var(--muted);margin-top:3px;}
+  .empty{color:var(--muted);text-align:center;padding:30px;font-size:13px;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:100;opacity:0;transition:.25s;}
+  .toast.show{opacity:1;}
+  .sect-title{font-size:13px;font-weight:700;color:var(--navy);margin:16px 0 8px;}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:6px;}
+  #setupNotice{font-size:13px;background:#fff6e0;border:1px solid var(--gold);padding:12px 14px;border-radius:9px;margin-bottom:16px;}
+  #setupNotice code{background:#fff;padding:1px 5px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚙️ Spot Welding Check</h1>
+    <div class="sub">Summit Auto Body Industry — Ayutthaya</div>
+  </div>
+  <div class="sub" id="connStatus">กำลังเชื่อมต่อ...</div>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="setup">🏭 Setup เครื่อง/มาตรฐาน</button>
+  <button class="tab-btn" data-tab="inspect">📝 บันทึกตรวจสอบใหม่</button>
+  <button class="tab-btn" data-tab="history">📋 ประวัติการตรวจสอบ</button>
+</nav>
+
+<main>
+
+<div id="setupNotice">
+  ⚠️ ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์ index.html (บรรทัด script ด้านล่างสุด) ก่อนใช้งานจริงนะคะ
+</div>
+
+<!-- ============ TAB: SETUP ============ -->
+<section id="tab-setup">
+  <div class="card">
+    <h2>เพิ่มเครื่องจักร / Part</h2>
+    <div class="grid grid-3">
+      <div><label>เครื่องจักรเบอร์ (Machine No.)</label><input id="m_no" placeholder="RB168"></div>
+      <div><label>Model</label><input id="m_model" placeholder="RG01"></div>
+      <div><label>RANK</label><input id="m_rank" placeholder="U"></div>
+      <div><label>Part No.</label><input id="m_partno" placeholder="898385 7902"></div>
+      <div><label>Part Name</label><input id="m_partname" placeholder="SILL; ASM FLOOR RR"></div>
+      <div><label>Doc No.</label><input id="m_docno" placeholder="QA4-2-016"></div>
+      <div><label>Rev.No / Rev.Date</label>
+        <div style="display:flex;gap:6px;">
+          <input id="m_revno" placeholder="Rev.No" style="width:40%">
+          <input id="m_revdate" type="date">
+        </div>
+      </div>
+      <div><label>Run No.</label><input id="m_runno" placeholder="SWC-RG01-028"></div>
+      <div><label>Issue Form (วันที่)</label><input id="m_issue" type="date"></div>
+    </div>
+    <button class="btn gold" style="margin-top:14px" onclick="saveMachine()">+ บันทึกเครื่องจักร</button>
+  </div>
+
+  <div class="card">
+    <h2>ตั้งค่า STD (มาตรฐานเครื่องสป๊อต) ต่อเครื่อง</h2>
+    <label>เลือกเครื่องจักร</label>
+    <select id="std_machine" onchange="loadStdForm()"></select>
+    <div id="stdFormArea" style="margin-top:14px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>รายการเครื่องจักรทั้งหมด</h2>
+    <div id="machineList" class="empty">ยังไม่มีข้อมูล</div>
+  </div>
+</section>
+
+<!-- ============ TAB: INSPECT ============ -->
+<section id="tab-inspect" style="display:none">
+  <div class="card">
+    <h2>ข้อมูลการตรวจสอบ</h2>
+    <div class="grid grid-3">
+      <div><label>เครื่องจักร / Part</label><select id="ins_machine" onchange="renderGunTables()"></select></div>
+      <div><label>วันที่ตรวจสอบ</label><input id="ins_date" type="date"></div>
+      <div><label>ผู้ตรวจสอบ</label><input id="ins_inspector" placeholder="ชื่อพนักงาน"></div>
+      <div><label>กะ (Shift)</label>
+        <select id="ins_shift"><option value="">-</option><option>เช้า</option><option>บ่าย</option><option>ดึก</option></select>
+      </div>
+      <div><label>จำนวนผลิตรวม (Total Quantity)</label><input id="ins_qty" type="number" placeholder="เช่น 350"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>1) เงื่อนไขการปรับเครื่องสป๊อต (STD vs ACT)</h2>
+    <div id="gunTablesArea" class="empty">เลือกเครื่องจักรก่อนเพื่อโหลดค่ามาตรฐาน</div>
+  </div>
+
+  <div class="card">
+    <h2>2) Driver Check — Pallet 1-35 (แตะเพื่อสลับ ✓ ติดแน่น / X ไม่ติด)</h2>
+    <div id="palletGrid" class="grid35"></div>
+    <div class="hint">แตะ 1 ครั้ง = ✓ ติดแน่น (เขียว) · แตะอีกครั้ง = X ไม่ติด (แดง) · แตะอีกครั้ง = ล้างค่า</div>
+  </div>
+
+  <div class="card">
+    <h2>3) Nugget Test (มาตรฐาน ≥ 4.2 mm.)</h2>
+    <table>
+      <thead><tr><th>จุด</th><th>Start</th><th>Middle</th><th>End</th><th>ผล</th></tr></thead>
+      <tbody id="nuggetBody"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="text-align:right;">
+    <button class="btn ghost" onclick="saveRecord('draft')">💾 บันทึกร่าง (Draft)</button>
+    <button class="btn gold" onclick="saveRecord('submitted')">✅ บันทึกและส่งตรวจสอบ</button>
+  </div>
+</section>
+
+<!-- ============ TAB: HISTORY ============ -->
+<section id="tab-history" style="display:none">
+  <div class="card">
+    <h2>ประวัติการตรวจสอบทั้งหมด</h2>
+    <div id="historyList" class="empty">ยังไม่มีข้อมูล</div>
+  </div>
+</section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= CONFIG: ใส่ค่า Supabase ของพี่บีตรงนี้ ================= */
+const SUPABASE_URL = 'https://rbydsetkjvvqbcrmpbli.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieWRzZXRranZ2cWJjcm1wYmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwMjA2NzcsImV4cCI6MjEwMjU5NjY3N30.plBFA5rVas_BlsLXmn0n8SH1EfN28wKq3iORGNxddrk';
+/* ========================================================================== */
+
+let db = null;
+let configured = SUPABASE_URL.startsWith('http') && SUPABASE_KEY.length > 20;
+if (configured) {
+  const { createClient } = supabase;
+  db = createClient(SUPABASE_URL, SUPABASE_KEY);
+  document.getElementById('connStatus').textContent = 'เชื่อมต่อ Supabase แล้ว ✅';
+  document.getElementById('setupNotice').style.display = 'none';
+} else {
+  document.getElementById('connStatus').textContent = 'ยังไม่ได้ตั้งค่า DB ⚠️';
+}
+
+const GUN_FIELDS = [
+  {key:'squeeze_time', tol:'squeeze_tol', act:'act_squeeze_time', label:'SQUZTIME (Sec.)'},
+  {key:'slope', tol:'slope_tol', act:'act_slope', label:'SLOPE (CYC)'},
+  {key:'weldtime', tol:'weldtime_tol', act:'act_weldtime', label:'WELDTIME (Sec.)'},
+  {key:'hold_time', tol:'hold_time_tol', act:'act_hold_time', label:'HOLD TIME (Sec.)'},
+  {key:'weld_current', tol:'weld_current_tol', act:'act_weld_current', label:'WELD CURRENT (kA)'},
+  {key:'tip_force', tol:'tip_force_tol', act:'act_tip_force', label:'TIP FORCE (kN)'},
+  {key:'tip_size', tol:null, act:'act_tip_size', label:'TIP (mm.)'},
+];
+const NUGGET_POINTS = ['A1','A2','B'];
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    ['setup','inspect','history'].forEach(t=>{
+      document.getElementById('tab-'+t).style.display = (t===b.dataset.tab)?'block':'none';
+    });
+    if(b.dataset.tab==='inspect') renderPalletGrid();
+    if(b.dataset.tab==='history') loadHistory();
+    if(b.dataset.tab==='inspect') renderNuggetTable();
+  });
+});
+
+/* ---------- Machines: Setup ---------- */
+async function saveMachine(){
+  if(!configured) return toast('ยังไม่ได้ตั้งค่า Supabase ค่ะ');
+  const payload = {
+    machine_no: val('m_no'), model: val('m_model'), rank: val('m_rank'),
+    part_no: val('m_partno'), part_name: val('m_partname'),
+    doc_no: val('m_docno'), rev_no: val('m_revno'), rev_date: val('m_revdate')||null,
+    run_no: val('m_runno'), issue_form: val('m_issue')||null
+  };
+  if(!payload.machine_no || !payload.part_no || !payload.part_name){
+    return toast('กรอกอย่างน้อย เครื่องจักรเบอร์ / Part No. / Part Name ค่ะ');
+  }
+  const {error} = await db.from('spot_machines').insert([payload]);
+  if(error) return toast('บันทึกไม่สำเร็จ: '+error.message);
+  toast('บันทึกเครื่องจักรสำเร็จ ✅');
+  ['m_no','m_model','m_rank','m_partno','m_partname','m_docno','m_revno','m_revdate','m_runno','m_issue'].forEach(id=>document.getElementById(id).value='');
+  await loadMachines();
+}
+
+function val(id){ return document.getElementById(id).value.trim(); }
+
+let machinesCache = [];
+async function loadMachines(){
+  if(!configured) return;
+  const {data, error} = await db.from('spot_machines').select('*').eq('is_active', true).order('created_at',{ascending:false});
+  if(error) return toast('โหลดข้อมูลไม่สำเร็จ: '+error.message);
+  machinesCache = data || [];
+  const opts = m => `<option value="${m.id}">${m.machine_no} — ${m.part_name} (${m.part_no})</option>`;
+  document.getElementById('std_machine').innerHTML = machinesCache.map(opts).join('') || '<option>-- ไม่มีข้อมูล --</option>';
+  document.getElementById('ins_machine').innerHTML = machinesCache.map(opts).join('') || '<option>-- ไม่มีข้อมูล --</option>';
+
+  const listEl = document.getElementById('machineList');
+  listEl.innerHTML = machinesCache.length ? machinesCache.map(m=>`
+    <div class="hist-row" style="cursor:default">
+      <div>
+        <b>${m.machine_no}</b> · ${m.model||'-'} · RANK ${m.rank||'-'}
+        <div class="meta">Part: ${m.part_name} (${m.part_no}) · Doc: ${m.doc_no||'-'} Rev.${m.rev_no||'-'}</div>
+      </div>
+    </div>`).join('') : '<div class="empty">ยังไม่มีข้อมูล — เพิ่มเครื่องจักรด้านบนก่อนค่ะ</div>';
+
+  if(machinesCache.length){ loadStdForm(); renderGunTables(); }
+}
+
+async function loadStdForm(){
+  const machineId = document.getElementById('std_machine').value;
+  if(!machineId) return;
+  const {data} = await db.from('spot_gun_std').select('*').eq('machine_id', machineId);
+  const existing = {1:null,2:null};
+  (data||[]).forEach(r=> existing[r.gun_no]=r);
+
+  let html = '';
+  [1,2].forEach(gunNo=>{
+    const g = existing[gunNo] || {};
+    html += `<div class="sect-title">SERVO GUN #${gunNo}</div><div class="grid grid-3">`;
+    GUN_FIELDS.forEach(f=>{
+      html += `<div>
+        <label>${f.label} ${f.tol? '(± Tol.)':''}</label>
+        <div style="display:flex;gap:6px;">
+          <input type="number" step="0.01" id="std_${gunNo}_${f.key}" placeholder="ค่ากลาง" value="${g[f.key]??''}">
+          ${f.tol? `<input type="number" step="0.01" id="std_${gunNo}_${f.tol}" placeholder="±Tol" value="${g[f.tol]??''}" style="width:70px">` : ''}
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  html += `<button class="btn gold" style="margin-top:14px" onclick="saveStd()">💾 บันทึกค่ามาตรฐาน STD</button>`;
+  document.getElementById('stdFormArea').innerHTML = html;
+}
+
+async function saveStd(){
+  const machineId = document.getElementById('std_machine').value;
+  if(!machineId) return toast('เลือกเครื่องจักรก่อนค่ะ');
+  for(const gunNo of [1,2]){
+    const row = {machine_id: Number(machineId), gun_no: gunNo};
+    GUN_FIELDS.forEach(f=>{
+      const v = document.getElementById(`std_${gunNo}_${f.key}`).value;
+      row[f.key] = v===''? null : Number(v);
+      if(f.tol){
+        const vt = document.getElementById(`std_${gunNo}_${f.tol}`).value;
+        row[f.tol] = vt===''? null : Number(vt);
+      }
+    });
+    const {error} = await db.from('spot_gun_std').upsert([row], {onConflict:'machine_id,gun_no'});
+    if(error) return toast('บันทึก STD ไม่สำเร็จ: '+error.message);
+  }
+  toast('บันทึกค่ามาตรฐานสำเร็จ ✅');
+}
+
+/* ---------- Inspection: Gun tables (STD vs ACT) ---------- */
+async function renderGunTables(){
+  const machineId = document.getElementById('ins_machine').value;
+  const area = document.getElementById('gunTablesArea');
+  if(!machineId || !configured){ area.innerHTML = '<div class="empty">เลือกเครื่องจักรก่อนเพื่อโหลดค่ามาตรฐาน</div>'; return; }
+  const {data} = await db.from('spot_gun_std').select('*').eq('machine_id', machineId);
+  if(!data || !data.length){ area.innerHTML = '<div class="empty">เครื่องนี้ยังไม่ได้ตั้งค่า STD — ไปที่แท็บ Setup ก่อนค่ะ</div>'; return; }
+
+  let html = '';
+  [1,2].forEach(gunNo=>{
+    const g = data.find(r=>r.gun_no===gunNo);
+    if(!g) return;
+    html += `<div class="sect-title">SERVO GUN #${gunNo}</div>
+    <table class="gun-table">
+      <thead><tr><th>รายการ</th><th>STD</th><th>ACT</th><th>ผล</th></tr></thead>
+      <tbody>`;
+    GUN_FIELDS.forEach(f=>{
+      const stdTxt = f.tol ? `${g[f.key]??'-'} ± ${g[f.tol]??0}` : `${g[f.key]??'-'}`;
+      html += `<tr>
+        <td>${f.label}</td>
+        <td class="std-cell">${stdTxt}</td>
+        <td><input type="number" step="0.01" class="act-input" id="act_${gunNo}_${f.key}"
+              data-std="${g[f.key]??''}" data-tol="${f.tol? (g[f.tol]??0):0}"
+              oninput="checkGunResult(${gunNo},'${f.key}')"></td>
+        <td id="res_${gunNo}_${f.key}">-</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  });
+  area.innerHTML = html;
+}
+
+function checkGunResult(gunNo, key){
+  const inp = document.getElementById(`act_${gunNo}_${key}`);
+  const resCell = document.getElementById(`res_${gunNo}_${key}`);
+  const std = parseFloat(inp.dataset.std), tol = parseFloat(inp.dataset.tol)||0;
+  const act = parseFloat(inp.value);
+  if(isNaN(act) || isNaN(std)){ resCell.innerHTML='-'; resCell.className=''; return; }
+  const ok = Math.abs(act-std) <= tol;
+  resCell.innerHTML = ok? '<span class="pass">✓ PASS</span>' : '<span class="fail">✕ FAIL</span>';
+}
+
+/* ---------- Inspection: Driver Check grid ---------- */
+let palletState = {}; // {1:'O',2:'X',...}
+function renderPalletGrid(){
+  const grid = document.getElementById('palletGrid');
+  let html = '';
+  for(let i=1;i<=35;i++){
+    const st = palletState[i] || '';
+    html += `<div class="pallet-btn ${st==='O'?'ok':st==='X'?'ng':''}" onclick="togglePallet(${i})">
+      <div class="num">#${i}</div><div class="mark">${st==='O'?'✓':st==='X'?'✕':'-'}</div>
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+function togglePallet(i){
+  const cur = palletState[i];
+  palletState[i] = (!cur)? 'O' : (cur==='O')? 'X' : '';
+  if(!palletState[i]) delete palletState[i];
+  renderPalletGrid();
+}
+
+/* ---------- Inspection: Nugget test ---------- */
+function renderNuggetTable(){
+  const body = document.getElementById('nuggetBody');
+  body.innerHTML = NUGGET_POINTS.map(p=>`
+    <tr>
+      <td><b>${p}</b></td>
+      <td><input type="number" step="0.01" class="act-input" id="nug_${p}_start" oninput="checkNugget('${p}')"></td>
+      <td><input type="number" step="0.01" class="act-input" id="nug_${p}_middle" oninput="checkNugget('${p}')"></td>
+      <td><input type="number" step="0.01" class="act-input" id="nug_${p}_end" oninput="checkNugget('${p}')"></td>
+      <td id="nug_${p}_result">-</td>
+    </tr>`).join('');
+}
+function checkNugget(p){
+  const s = parseFloat(document.getElementById(`nug_${p}_start`).value);
+  const m = parseFloat(document.getElementById(`nug_${p}_middle`).value);
+  const e = parseFloat(document.getElementById(`nug_${p}_end`).value);
+  const vals = [s,m,e].filter(v=>!isNaN(v));
+  const resCell = document.getElementById(`nug_${p}_result`);
+  if(!vals.length){ resCell.innerHTML='-'; return; }
+  const ok = vals.every(v=>v>=4.2);
+  resCell.innerHTML = ok? '<span class="pass">✓ PASS</span>' : '<span class="fail">✕ FAIL (&lt;4.2mm)</span>';
+}
+
+/* ---------- Save full inspection record ---------- */
+async function saveRecord(status){
+  if(!configured) return toast('ยังไม่ได้ตั้งค่า Supabase ค่ะ');
+  const machineId = document.getElementById('ins_machine').value;
+  if(!machineId) return toast('เลือกเครื่องจักรก่อนค่ะ');
+  const recDate = document.getElementById('ins_date').value || new Date().toISOString().slice(0,10);
+
+  const {data: recData, error: recErr} = await db.from('spot_records').insert([{
+    machine_id: Number(machineId),
+    record_date: recDate,
+    inspector_name: val('ins_inspector'),
+    shift: document.getElementById('ins_shift').value,
+    total_quantity: document.getElementById('ins_qty').value || null,
+    status
+  }]).select().single();
+  if(recErr) return toast('บันทึกไม่สำเร็จ: '+recErr.message);
+  const recordId = recData.id;
+
+  // gun actual
+  const gunRows = [];
+  [1,2].forEach(gunNo=>{
+    const row = {record_id: recordId, gun_no: gunNo};
+    let hasAny = false;
+    GUN_FIELDS.forEach(f=>{
+      const el = document.getElementById(`act_${gunNo}_${f.key}`);
+      if(el && el.value!==''){ row[f.act]=Number(el.value); hasAny = true; }
+    });
+    if(hasAny) gunRows.push(row);
+  });
+  if(gunRows.length) await db.from('spot_gun_actual').insert(gunRows);
+
+  // driver check
+  const palletRows = Object.entries(palletState).map(([no,res])=>({record_id:recordId, pallet_no:Number(no), result:res}));
+  if(palletRows.length) await db.from('spot_driver_check').insert(palletRows);
+
+  // nugget test
+  const nuggetRows = [];
+  NUGGET_POINTS.forEach(p=>{
+    const s = document.getElementById(`nug_${p}_start`).value;
+    const m = document.getElementById(`nug_${p}_middle`).value;
+    const e = document.getElementById(`nug_${p}_end`).value;
+    if(s==='' && m==='' && e==='') return;
+    const vals = [s,m,e].filter(v=>v!=='').map(Number);
+    const result = vals.every(v=>v>=4.2) ? 'PASS':'FAIL';
+    nuggetRows.push({record_id:recordId, point:p, start_val:s||null, middle_val:m||null, end_val:e||null, result});
+  });
+  if(nuggetRows.length) await db.from('spot_nugget_test').insert(nuggetRows);
+
+  toast(status==='draft' ? '💾 บันทึกร่างสำเร็จ' : '✅ บันทึกและส่งตรวจสอบสำเร็จ');
+  resetInspectForm();
+}
+
+function resetInspectForm(){
+  palletState = {};
+  renderPalletGrid();
+  document.getElementById('ins_inspector').value='';
+  document.getElementById('ins_qty').value='';
+  renderNuggetTable();
+  renderGunTables();
+}
+
+/* ---------- History ---------- */
+async function loadHistory(){
+  if(!configured) return;
+  const {data, error} = await db.from('spot_records')
+    .select('*, spot_machines(machine_no, part_name, part_no)')
+    .order('created_at',{ascending:false}).limit(50);
+  const el = document.getElementById('historyList');
+  if(error){ el.innerHTML = '<div class="empty">โหลดไม่สำเร็จ: '+error.message+'</div>'; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">ยังไม่มีประวัติการตรวจสอบ</div>'; return; }
+  el.innerHTML = data.map(r=>`
+    <div class="hist-row">
+      <div>
+        <b>${r.spot_machines?.machine_no||'-'}</b> · ${r.spot_machines?.part_name||'-'}
+        <div class="meta">${r.record_date} · ผู้ตรวจ: ${r.inspector_name||'-'} · กะ: ${r.shift||'-'} · จำนวน: ${r.total_quantity||'-'}</div>
+      </div>
+      <span class="badge ${r.status==='submitted'?'ok':'draft'}">${r.status==='submitted'?'ส่งตรวจแล้ว':'ร่าง'}</span>
+    </div>`).join('');
+}
+
+/* ---------- Init ---------- */
+document.getElementById('ins_date').value = new Date().toISOString().slice(0,10);
+renderNuggetTable();
+renderPalletGrid();
+if(configured) loadMachines();
+</script>
+</body>
+</html>
