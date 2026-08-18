@@ -163,6 +163,27 @@
 
 <!-- ============ TAB: SETUP ============ -->
 <section id="tab-setup" style="display:none">
+
+  <div class="card">
+    <h2>📥 Import เครื่องจักรจาก JSON</h2>
+    <div class="desc">อัปโหลดไฟล์ .json ที่มีข้อมูลเครื่องจักร + STD (รูปแบบเดียวกับ config ที่ระบบใช้อยู่) เพื่อนำเข้าทีเดียวหลายเครื่อง แทนการกรอกทีละเครื่องด้านล่าง</div>
+
+    <label>เลือกไฟล์ JSON</label>
+    <input type="file" id="importJsonFile" accept="application/json,.json" onchange="handleImportFileSelect(event)">
+
+    <div class="hint" style="margin-top:8px">
+      โครงสร้างไฟล์ต้องเป็น <b>array ของ object เครื่องจักร</b> แต่ละตัวมี field: <code>family, customer, model, machine_no, part_no, part_name, rank, doc_no, run_no, rev_no, rev_date, issue_form_date, config</code>
+      — field <code>config</code> ต้องตรงรูปแบบตาม family นั้นๆ (ดูตัวอย่างในปุ่ม "ดู JSON ตัวอย่าง" ด้านล่าง)
+    </div>
+
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn" style="background:#fff;color:var(--navy);border:1px solid var(--line);" onclick="showImportExample()">👀 ดู JSON ตัวอย่าง</button>
+      <button class="btn gold" id="importConfirmBtn" style="display:none" onclick="confirmImportMachines()">✅ นำเข้าข้อมูล (<span id="importCount">0</span> เครื่อง)</button>
+    </div>
+
+    <div id="importPreviewArea" style="margin-top:12px;"></div>
+  </div>
+
   <div class="card">
     <h2 id="setupFormTitle">เพิ่มเครื่องจักร / Part ใหม่</h2>
     <div class="desc">เลือก family ก่อน ระบบจะดึง config JSON ตัวอย่างมาให้แก้ได้เลย — ไม่ต้องเขียนเองตั้งแต่ต้น</div>
@@ -1219,6 +1240,150 @@ async function deleteMachine(id){
   if(error){ toast('ลบไม่สำเร็จ: '+error.message); return; }
   toast('🗑️ ลบเครื่องจักรแล้ว');
   if(editingMachineId === id) resetSetupForm();
+  await loadMachines();
+  renderMachineList();
+}
+
+/* ============================================================
+   8) IMPORT เครื่องจักรจาก JSON (สำหรับนำเข้าครั้งละหลายเครื่อง)
+   ============================================================ */
+let pendingImportData = [];
+
+function importExampleJSON(){
+  return JSON.stringify([
+    {
+      family: "spot_nugget",
+      customer: "ISUZU",
+      model: "RG01",
+      machine_no: "RB168",
+      part_no: "898385 7902",
+      part_name: "SILL; ASM FLOOR RR",
+      rank: "U",
+      doc_no: "QA4-2-016",
+      run_no: "SWC-RG01-028",
+      rev_no: "3",
+      rev_date: "2024-11-15",
+      issue_form_date: "2014-11-10",
+      config: {
+        guns: ["SERVO GUN #1", "SERVO GUN #2"],
+        std_sets: {
+          "SERVO GUN #1": [{label:"STD#1", squeeze:30, slope:3, weld:5.0, hold:20, current:4.5, pressure:5.0, tip:16}],
+          "SERVO GUN #2": [{label:"STD#1", squeeze:30, slope:1, weld:25, hold:20, current:8.5, pressure:5.0, tip:16}]
+        },
+        time_unit: "sec",
+        points: ["A1","A2","B"],
+        nugget_threshold_mm: 4.2,
+        driver_check: {style:"pallet", count:35}
+      }
+    }
+  ], null, 2);
+}
+
+function showImportExample(){
+  const area = document.getElementById('importPreviewArea');
+  area.innerHTML = `<div class="hint" style="margin-bottom:6px">ตัวอย่างไฟล์ JSON ที่ import ได้ (1 เครื่อง family spot_nugget) — เอาไปทำเป็น array หลายตัวต่อกันได้เลย:</div>
+    <pre id="s_config_preview" style="display:block">${esc(importExampleJSON())}</pre>`;
+}
+
+const REQUIRED_FAMILIES = ['spot_nugget','spot_torque','weld_length','weld_hammer','weld_zeroset'];
+
+function handleImportFileSelect(evt){
+  const file = evt.target.files[0];
+  const area = document.getElementById('importPreviewArea');
+  const btn = document.getElementById('importConfirmBtn');
+  pendingImportData = [];
+  btn.style.display = 'none';
+  if(!file){ return; }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let data;
+    try{
+      data = JSON.parse(e.target.result);
+    }catch(err){
+      area.innerHTML = `<div class="hint" style="color:var(--fail)">❌ ไฟล์นี้ไม่ใช่ JSON ที่ถูกต้อง: ${esc(err.message)}</div>`;
+      return;
+    }
+    if(!Array.isArray(data)){
+      area.innerHTML = `<div class="hint" style="color:var(--fail)">❌ ไฟล์ต้องเป็น array [...] ของเครื่องจักร ไม่ใช่ object เดี่ยวๆ ค่ะ</div>`;
+      return;
+    }
+
+    // ตรวจสอบความถูกต้องเบื้องต้นทีละแถว
+    const errors = [];
+    const valid = [];
+    data.forEach((row, i) => {
+      const n = i+1;
+      if(!row.family || !REQUIRED_FAMILIES.includes(row.family)){ errors.push(`แถว ${n}: family ไม่ถูกต้อง หรือไม่มี ("${row.family||''}")`); return; }
+      if(!row.part_no || !row.part_name){ errors.push(`แถว ${n}: ขาด part_no หรือ part_name`); return; }
+      if(!row.config || typeof row.config !== 'object'){ errors.push(`แถว ${n}: ขาด config หรือไม่ใช่ object`); return; }
+      valid.push(row);
+    });
+
+    pendingImportData = valid;
+
+    let html = `<div class="hint">พบ ${data.length} รายการในไฟล์ · ผ่านการตรวจสอบ <b style="color:var(--ok)">${valid.length}</b> รายการ ${errors.length? `· มีปัญหา <b style="color:var(--fail)">${errors.length}</b> รายการ`:''}</div>`;
+    if(errors.length){
+      html += `<div class="hint" style="color:var(--fail);margin-top:6px">${errors.map(esc).join('<br>')}</div>`;
+    }
+    if(valid.length){
+      html += `<div style="margin-top:10px;max-height:260px;overflow:auto;">` + valid.map(m => `
+        <div class="hist-row" style="cursor:default">
+          <div>
+            <b>${esc(m.machine_no||'-')}</b> · ${esc(m.part_name)}
+            <span class="family-badge">${FAMILY_LABEL[m.family]||m.family}</span>
+            <div class="meta">Part No.: ${esc(m.part_no)} ${m.customer? ' · ลูกค้า: '+esc(m.customer):''}</div>
+          </div>
+        </div>`).join('') + `</div>`;
+    }
+    area.innerHTML = html;
+
+    if(valid.length){
+      document.getElementById('importCount').textContent = valid.length;
+      btn.style.display = 'inline-block';
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+async function confirmImportMachines(){
+  if(!configured){ toast('โหมดตัวอย่าง — ยังไม่ได้ต่อ Supabase จริง'); return; }
+  if(!pendingImportData.length){ toast('ไม่มีข้อมูลที่จะนำเข้า'); return; }
+
+  const btn = document.getElementById('importConfirmBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังนำเข้า...';
+
+  const payloads = pendingImportData.map(m => ({
+    family: m.family,
+    customer: m.customer || null,
+    model: m.model || null,
+    machine_no: m.machine_no || null,
+    part_no: m.part_no,
+    part_name: m.part_name,
+    rank: m.rank || null,
+    doc_no: m.doc_no || null,
+    run_no: m.run_no || null,
+    rev_no: m.rev_no || null,
+    rev_date: m.rev_date || null,
+    issue_form_date: m.issue_form_date || null,
+    config: m.config
+  }));
+
+  const {data, error} = await db.from('machines').insert(payloads).select();
+  btn.disabled = false;
+  btn.innerHTML = `✅ นำเข้าข้อมูล (<span id="importCount">${pendingImportData.length}</span> เครื่อง)`;
+
+  if(error){
+    toast('นำเข้าไม่สำเร็จ: '+error.message);
+    return;
+  }
+  toast(`✅ นำเข้าเครื่องจักรสำเร็จ ${data.length} เครื่อง`);
+  document.getElementById('importPreviewArea').innerHTML = `<div class="hint" style="color:var(--ok)">✅ นำเข้าสำเร็จ ${data.length} เครื่อง — เลื่อนลงไปดูใน "รายการเครื่องจักรทั้งหมด" ด้านล่างได้เลยค่ะ</div>`;
+  document.getElementById('importConfirmBtn').style.display = 'none';
+  document.getElementById('importJsonFile').value = '';
+  pendingImportData = [];
+
   await loadMachines();
   renderMachineList();
 }
