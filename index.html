@@ -74,10 +74,10 @@
   <div class="sub" id="connStatus">กำลังเชื่อมต่อ...</div>
 </header>
 
-<nav style="display:flex;gap:8px;padding:12px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:10;">
-  <button class="tab-btn" data-tab="setup" onclick="switchTab('setup')" style="border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">🏭 Setup เครื่องจักร</button>
+<nav style="display:flex;gap:8px;padding:12px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:10;">
   <button class="tab-btn active" data-tab="form" onclick="switchTab('form')" style="border:1px solid var(--line);background:var(--navy);color:#fff;padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">📝 กรอกฟอร์ม</button>
   <button class="tab-btn" data-tab="history" onclick="switchTab('history')" style="border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">📋 ประวัติ / กรอกต่อ</button>
+  <a href="admin.html" style="margin-left:auto;font-size:12.5px;color:var(--muted);text-decoration:none;border:1px solid var(--line);padding:8px 14px;border-radius:8px;">🔧 Admin Panel</a>
 </nav>
 
 <main>
@@ -133,73 +133,6 @@
   </div>
 </section>
 
-<!-- ============ TAB: SETUP ============ -->
-<section id="tab-setup" style="display:none">
-
-  <!-- ============ LOGIN GATE — โชว์เมื่อยังไม่ได้ login ============ -->
-  <div class="card" id="setupLoginGate">
-    <h2>🔒 สำหรับ Admin เท่านั้น</h2>
-    <div class="desc">หน้านี้ล็อกไว้ ต้อง login ก่อนถึงจะเพิ่ม/แก้ไข/ลบเครื่องจักรได้ (ป้องกันพนักงานหน้างานเผลอกดโดยไม่ตั้งใจ)</div>
-    <div class="grid grid-3" style="max-width:520px">
-      <div><label>อีเมล Admin</label><input id="admin_email" type="email" placeholder="admin@company.com"></div>
-      <div><label>รหัสผ่าน</label><input id="admin_password" type="password" placeholder="••••••••"></div>
-      <div style="display:flex;align-items:flex-end;">
-        <button class="btn gold" style="width:100%" onclick="signInAdmin()">🔑 เข้าสู่ระบบ</button>
-      </div>
-    </div>
-    <div id="loginError" class="hint" style="color:var(--fail);margin-top:8px;"></div>
-  </div>
-
-  <!-- ============ SETUP CONTENT — โชว์เมื่อ login แล้ว ============ -->
-  <div id="setupContent" style="display:none">
-  <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-    <span class="family-badge" style="background:#eafaf1;color:var(--ok);">🔓 Login แล้ว: <span id="adminEmailLabel"></span></span>
-    <button class="btn" style="background:#fff;color:var(--fail);border:1px solid var(--line);padding:6px 12px;font-size:12px;" onclick="signOutAdmin()">ออกจากระบบ</button>
-  </div>
-
-  <div class="card">
-    <h2 id="setupFormTitle">เพิ่มเครื่องจักร / Part ใหม่</h2>
-    <div class="desc">เลือก family ก่อน ระบบจะดึง config JSON ตัวอย่างมาให้แก้ได้เลย — ไม่ต้องเขียนเองตั้งแต่ต้น</div>
-    <div class="grid grid-4">
-      <div><label>Family</label>
-        <select id="s_family" onchange="loadConfigTemplate()">
-          <option value="spot_nugget">🔩 สป๊อต · Nugget Test</option>
-          <option value="spot_torque">🔩 สป๊อต · Test Torque</option>
-          <option value="weld_length">🔧 เชื่อม · วัดความยาวแนวเชื่อม</option>
-          <option value="weld_hammer">🔧 เชื่อม · ค้อนเคาะ + Visual</option>
-          <option value="weld_zeroset">🔧 เชื่อม · Zero Set Log</option>
-        </select>
-      </div>
-      <div><label>Customer</label><input id="s_customer" placeholder="ISUZU, IEMT, HATC..."></div>
-      <div><label>Model</label><input id="s_model" placeholder="RG01"></div>
-      <div><label>Machine No.</label><input id="s_machineno" placeholder="RB168"></div>
-      <div><label>Part No.</label><input id="s_partno" placeholder="898385 7902"></div>
-      <div><label>Part Name</label><input id="s_partname" placeholder="SILL; ASM FLOOR RR"></div>
-      <div><label>RANK</label><input id="s_rank" placeholder="U"></div>
-      <div><label>Doc No.</label><input id="s_docno" placeholder="QA4-2-016"></div>
-      <div><label>Run No.</label><input id="s_runno" placeholder="SWC-RG01-028"></div>
-      <div><label>Rev.No</label><input id="s_revno" placeholder="3"></div>
-      <div><label>Rev.Date</label><input id="s_revdate" type="date"></div>
-      <div><label>Issue Form Date</label><input id="s_issuedate" type="date"></div>
-    </div>
-
-    <div class="sect-title">Config (JSON)</div>
-    <div class="hint" style="margin-bottom:6px">แก้ตัวเลข/label ตามเครื่องจริงได้เลย ระบบจะเช็ค JSON ให้ก่อนบันทึก ถ้าพิมพ์ผิดจะแจ้งเตือนไม่ให้บันทึก</div>
-    <textarea id="s_config" rows="14" style="width:100%;font-family:'SF Mono',Menlo,monospace;font-size:12.5px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#fbfcfd;"></textarea>
-
-    <div style="margin-top:14px;display:flex;gap:10px;">
-      <button class="btn gold" onclick="saveMachine()">💾 บันทึกเครื่องจักร</button>
-      <button class="btn" style="background:#fff;color:var(--navy);border:1px solid var(--line);" onclick="resetSetupForm()">+ เพิ่มเครื่องใหม่ (เคลียร์ฟอร์ม)</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>รายการเครื่องจักรทั้งหมด</h2>
-    <div id="machineList" class="empty">กำลังโหลด...</div>
-  </div>
-  </div>
-</section>
-
 </main>
 
 <div class="toast" id="toast"></div>
@@ -221,51 +154,6 @@ try{
     document.getElementById('connStatus').textContent = '🟡 โหมดตัวอย่าง (mock data)';
   }
 }catch(e){ document.getElementById('connStatus').textContent = '🔴 เชื่อมต่อไม่สำเร็จ'; }
-
-/* ============================================================
-   1.5) ADMIN AUTH — คุมสิทธิ์เข้าหน้า Setup ด้วย Supabase Auth
-   ============================================================ */
-async function signInAdmin(){
-  if(!configured){ toast('โหมดตัวอย่าง — ยังไม่ได้ต่อ Supabase จริง'); return; }
-  const email = document.getElementById('admin_email').value.trim();
-  const password = document.getElementById('admin_password').value;
-  const errEl = document.getElementById('loginError');
-  errEl.textContent = '';
-  if(!email || !password){ errEl.textContent = 'กรอกอีเมลและรหัสผ่านก่อนค่ะ'; return; }
-  const {error} = await db.auth.signInWithPassword({email, password});
-  if(error){ errEl.textContent = 'เข้าสู่ระบบไม่สำเร็จ: '+error.message; return; }
-  document.getElementById('admin_password').value = '';
-  await refreshAdminUI();
-  toast('🔓 เข้าสู่ระบบสำเร็จ');
-}
-
-async function signOutAdmin(){
-  if(!configured) return;
-  await db.auth.signOut();
-  await refreshAdminUI();
-  toast('ออกจากระบบแล้ว');
-}
-
-// เช็คสถานะ login แล้วสลับโชว์ login gate หรือ setup content ให้ตรงกัน
-async function refreshAdminUI(){
-  if(!configured){
-    // โหมดตัวอย่าง ไม่มี Supabase จริง — เปิดให้ดู setup content ได้เลยเพื่อพรีวิว
-    document.getElementById('setupLoginGate').style.display = 'none';
-    document.getElementById('setupContent').style.display = 'block';
-    renderMachineList();
-    return;
-  }
-  const {data:{session}} = await db.auth.getSession();
-  if(session){
-    document.getElementById('setupLoginGate').style.display = 'none';
-    document.getElementById('setupContent').style.display = 'block';
-    document.getElementById('adminEmailLabel').textContent = session.user.email;
-    renderMachineList();
-  } else {
-    document.getElementById('setupLoginGate').style.display = 'block';
-    document.getElementById('setupContent').style.display = 'none';
-  }
-}
 
 function toast(msg){
   const t = document.getElementById('toast');
@@ -309,51 +197,6 @@ const FAMILY_LABEL = {
   weld_zeroset: "🔧 เชื่อม · Zero Set Log"
 };
 
-// Template เริ่มต้นต่อ family (ปรับมาจากตัวอย่างท้ายไฟล์ hybrid_schema.sql) — ให้พี่บีแก้ตัวเลข/label ต่อได้เลย
-const CONFIG_TEMPLATES = {
-  spot_nugget: {
-    guns: ["SERVO GUN #1", "SERVO GUN #2"],
-    std_sets: {
-      "SERVO GUN #1": [
-        {label:"STD#1", squeeze:30, slope:3, weld:5.0, hold:20, current:4.5, pressure:5.0, tip:16}
-      ],
-      "SERVO GUN #2": [
-        {label:"STD#1", squeeze:30, slope:1, weld:25, hold:20, current:8.5, pressure:5.0, tip:16}
-      ]
-    },
-    time_unit: "sec",
-    points: ["A1","A2","B"],
-    nugget_threshold_mm: 4.2,
-    driver_check: {style:"pallet", count:35}
-  },
-  spot_torque: {
-    guns: ["STATIONARY"],
-    std_sets: { "STATIONARY": [
-      {label:"CONDITION", squeeze:40, slope:1, weld:15, hold:30, current:12, pressure:4.0, tip:null}
-    ]},
-    time_unit: "sec",
-    points: ["A","B"],
-    torque_threshold_kgfcm: 831,
-    driver_check: {style:"none"}
-  },
-  weld_length: {
-    condition: {current:85, current_tol:20, volt:16, volt_tol:5, gas_flow:25, wire_dia:0.8, wire_type:"MT12"},
-    points: [1,2,3,4],
-    length_std_min_mm: 20,
-    length_std_max_mm: 25
-  },
-  weld_hammer: {
-    condition: {current:125, current_tol:30, volt:20, volt_tol:15, gas_flow:18, gas_flow_tol:3, wire_dia:0.9, wire_type:"CO2"}
-  },
-  weld_zeroset: {
-    condition: {current:18, current_tol:3, gas_flow:0.9, wire_type:"CO2"},
-    time_slots: ["08:00","13:00","17:30","20:00","01:00","05:30"],
-    cadence: "weekly_or_daily"
-  }
-};
-
-let editingMachineId = null; // null = กำลังเพิ่มเครื่องใหม่ / มีค่า = กำลังแก้ไขเครื่องเดิม
-
 let MACHINES = [];
 let currentMachine = null;
 let currentRecordId = null;   // null = กำลังเปิด Order ใหม่ / มีค่า = กำลังแก้ไข/กรอกต่อ Order เดิม
@@ -361,7 +204,6 @@ let currentRecordId = null;   // null = กำลังเปิด Order ให
 function switchTab(tab){
   document.getElementById('tab-form').style.display = tab==='form' ? 'block':'none';
   document.getElementById('tab-history').style.display = tab==='history' ? 'block':'none';
-  document.getElementById('tab-setup').style.display = tab==='setup' ? 'block':'none';
   document.querySelectorAll('.tab-btn').forEach(b=>{
     const active = b.dataset.tab === tab;
     b.classList.toggle('active', active);
@@ -369,7 +211,6 @@ function switchTab(tab){
     b.style.color = active ? '#fff' : 'var(--navy)';
   });
   if(tab==='history') loadHistory();
-  if(tab==='setup') refreshAdminUI();
 }
 
 function updateLotStatusBadge(status){
@@ -890,122 +731,8 @@ async function populateFormFromRecord(family, recordId){
   // weld_zeroset ไม่ผูก record_id (ผูกกับ machine+วันที่แทน) จึงไม่ต้อง populate ผ่านทางนี้
 }
 
-/* ============================================================
-   7) SETUP — เพิ่ม/แก้ไข/ลบเครื่องจักร (machines table)
-   ============================================================ */
-function loadConfigTemplate(){
-  // โหลด template เฉพาะตอน "เพิ่มเครื่องใหม่" เท่านั้น — ถ้ากำลังแก้ไขเครื่องเดิมอยู่ ไม่ทับ config ที่โหลดมา
-  if(editingMachineId) return;
-  const family = document.getElementById('s_family').value;
-  document.getElementById('s_config').value = JSON.stringify(CONFIG_TEMPLATES[family], null, 2);
-}
-
-function resetSetupForm(){
-  editingMachineId = null;
-  document.getElementById('setupFormTitle').textContent = 'เพิ่มเครื่องจักร / Part ใหม่';
-  ['s_customer','s_model','s_machineno','s_partno','s_partname','s_rank','s_docno','s_runno','s_revno','s_revdate','s_issuedate']
-    .forEach(id => document.getElementById(id).value = '');
-  document.getElementById('s_family').value = 'spot_nugget';
-  loadConfigTemplate();
-}
-
-async function saveMachine(){
-  if(!configured){ toast('โหมดตัวอย่าง — ยังไม่ได้ต่อ Supabase จริง'); return; }
-  const partNo = document.getElementById('s_partno').value.trim();
-  const partName = document.getElementById('s_partname').value.trim();
-  if(!partNo || !partName){ toast('กรอก Part No. และ Part Name ก่อนค่ะ'); return; }
-
-  let config;
-  try{
-    config = JSON.parse(document.getElementById('s_config').value);
-  }catch(e){
-    toast('❌ Config JSON ผิดรูปแบบ — เช็คเครื่องหมาย , หรือ { } ให้ครบ: '+e.message);
-    return;
-  }
-
-  const payload = {
-    family: document.getElementById('s_family').value,
-    customer: document.getElementById('s_customer').value || null,
-    model: document.getElementById('s_model').value || null,
-    machine_no: document.getElementById('s_machineno').value || null,
-    part_no: partNo,
-    part_name: partName,
-    rank: document.getElementById('s_rank').value || null,
-    doc_no: document.getElementById('s_docno').value || null,
-    run_no: document.getElementById('s_runno').value || null,
-    rev_no: document.getElementById('s_revno').value || null,
-    rev_date: document.getElementById('s_revdate').value || null,
-    issue_form_date: document.getElementById('s_issuedate').value || null,
-    config,
-    updated_at: new Date().toISOString()
-  };
-
-  if(editingMachineId){
-    const {error} = await db.from('machines').update(payload).eq('id', editingMachineId);
-    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
-    toast('✅ แก้ไขเครื่องจักรสำเร็จ');
-  } else {
-    const {error} = await db.from('machines').insert([payload]);
-    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
-    toast('✅ เพิ่มเครื่องจักรใหม่สำเร็จ');
-  }
-  resetSetupForm();
-  await loadMachines();       // รีเฟรช dropdown เลือกเครื่องในแท็บกรอกฟอร์มด้วย
-  renderMachineList();
-}
-
-function renderMachineList(){
-  const el = document.getElementById('machineList');
-  if(!MACHINES.length){ el.innerHTML = '<div class="empty">ยังไม่มีเครื่องจักร — เพิ่มจากฟอร์มด้านบนได้เลยค่ะ</div>'; return; }
-  el.innerHTML = MACHINES.map(m => `
-    <div class="hist-row" style="cursor:default">
-      <div>
-        <b>${m.machine_no || '-'}</b> · ${m.part_name}
-        <span class="family-badge">${FAMILY_LABEL[m.family] || m.family}</span>
-        <div class="meta">Part No.: ${m.part_no || '-'} ${m.customer ? ' · ลูกค้า: '+m.customer : ''}</div>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn" style="background:#fff;color:var(--navy);border:1px solid var(--line);padding:6px 10px;font-size:12px;" onclick="editMachine(${m.id})">✏️ แก้ไข</button>
-        <button class="btn" style="background:#fff;color:var(--fail);border:1px solid var(--line);padding:6px 10px;font-size:12px;" onclick="deleteMachine(${m.id})">🗑️ ลบ</button>
-      </div>
-    </div>`).join('');
-}
-
-function editMachine(id){
-  const m = MACHINES.find(x => String(x.id) === String(id));
-  if(!m) return;
-  editingMachineId = m.id;
-  document.getElementById('setupFormTitle').textContent = `แก้ไขเครื่องจักร #${m.id} — ${m.machine_no || m.part_name}`;
-  document.getElementById('s_family').value = m.family;
-  document.getElementById('s_customer').value = m.customer || '';
-  document.getElementById('s_model').value = m.model || '';
-  document.getElementById('s_machineno').value = m.machine_no || '';
-  document.getElementById('s_partno').value = m.part_no || '';
-  document.getElementById('s_partname').value = m.part_name || '';
-  document.getElementById('s_rank').value = m.rank || '';
-  document.getElementById('s_docno').value = m.doc_no || '';
-  document.getElementById('s_runno').value = m.run_no || '';
-  document.getElementById('s_revno').value = m.rev_no || '';
-  document.getElementById('s_revdate').value = m.rev_date || '';
-  document.getElementById('s_issuedate').value = m.issue_form_date || '';
-  document.getElementById('s_config').value = JSON.stringify(m.config, null, 2);
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-async function deleteMachine(id){
-  if(!configured) return;
-  if(!confirm('ลบเครื่องจักรนี้แน่ใจไหมคะ? (ถ้ามีประวัติการตรวจสอบผูกอยู่ อาจลบไม่ได้เพราะติด foreign key)')) return;
-  const {error} = await db.from('machines').delete().eq('id', id);
-  if(error){ toast('ลบไม่สำเร็จ: '+error.message); return; }
-  toast('🗑️ ลบเครื่องจักรแล้ว');
-  if(editingMachineId === id) resetSetupForm();
-  await loadMachines();
-  renderMachineList();
-}
-
 /* ---------- INIT ---------- */
 document.getElementById('rec_date').value = new Date().toISOString().slice(0,10);
-loadConfigTemplate();
 loadMachines();
 </script>
 </body>
