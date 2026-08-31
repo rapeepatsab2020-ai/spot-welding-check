@@ -5,85 +5,107 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dynamic Inspection Form | Hybrid Schema</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#0b2540; --navy2:#123a63; --gold:#c9a227; --gold-l:#e8cf7a;
-    --bg:#f3f5f8; --card:#ffffff; --line:#e2e6ec; --text:#1c2733; --muted:#6b7686;
-    --ok:#1e8e5a; --fail:#c0392b; --warn:#b8860b;
+    --ink:#161b20; --muted:#5b6672; --paper:#f3f5f7; --surface:#ffffff;
+    --line:#dbe0e5; --line-strong:#b7c0c9;
+    --brand:#1f4e79; --brand-deep:#153347; --brand-tint:#e8eef3;
+    --ok:#1c7a4b; --ok-tint:#e5f4ec;
+    --fail:#b3261e; --fail-tint:#fbe9e8;
+    --warn:#96660a; --warn-tint:#fbf1dd;
+    --radius:6px; --radius-sm:4px;
   }
   *{box-sizing:border-box;}
-  body{margin:0;font-family:'Noto Sans Thai',sans-serif;background:var(--bg);color:var(--text);}
-  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
-  header h1{font-size:18px;margin:0;font-weight:700;}
-  header .sub{font-size:12px;color:var(--gold-l);margin-top:2px;}
-  main{max-width:1100px;margin:0 auto;padding:20px;}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
-  .card h2{font-size:16px;margin:0 0 4px;color:var(--navy);border-left:4px solid var(--gold);padding-left:10px;}
-  .card .desc{font-size:12px;color:var(--muted);margin:0 0 14px;padding-left:14px;}
+  body{margin:0;font-family:'Noto Sans Thai',sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  code, .mono, .act-input, input[type="number"], input[type="date"], input[type="time"]{font-family:'IBM Plex Mono','Noto Sans Thai',monospace;}
+
+  header{background:var(--brand-deep);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:3px solid var(--brand);}
+  header h1{font-size:17px;margin:0;font-weight:600;letter-spacing:.1px;}
+  header .sub{font-size:12px;color:#aebfcd;margin-top:3px;}
+
+  main{max-width:1100px;margin:0 auto;padding:24px;}
+
+  .card{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;}
+  .card h2{font-size:15px;margin:0 0 4px;color:var(--ink);font-weight:600;border-left:3px solid var(--brand);padding-left:10px;}
+  .card .desc{font-size:12px;color:var(--muted);margin:0 0 14px;padding-left:13px;line-height:1.5;}
+
   .grid{display:grid;gap:12px;}
   .grid-3{grid-template-columns:1fr 1fr 1fr;}
   .grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
   @media(max-width:700px){.grid-3,.grid-4{grid-template-columns:1fr;}}
-  label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:600;}
-  select,input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:14px;background:#fbfcfd;}
-  select:focus,input:focus,textarea:focus{outline:none;border-color:var(--navy2);background:#fff;}
-  .family-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#eef2f8;color:var(--navy2);margin-left:8px;vertical-align:middle;}
+
+  label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:500;}
+  select,input,textarea{width:100%;padding:8px 10px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);font-family:'Noto Sans Thai',sans-serif;font-size:14px;background:var(--surface);color:var(--ink);}
+  select:focus,input:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:-1px;border-color:var(--brand);}
+
+  .family-badge{display:inline-block;padding:2px 9px;border-radius:var(--radius-sm);font-size:11.5px;font-weight:500;background:var(--brand-tint);color:var(--brand-deep);margin-left:8px;vertical-align:middle;border:1px solid var(--line-strong);}
+
   table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
   th,td{border:1px solid var(--line);padding:6px 8px;text-align:center;}
-  th{background:#f0f3f7;color:var(--navy);font-weight:700;font-size:12px;}
-  .gun-table td:first-child, .gun-table th:first-child{text-align:left;background:#f7f9fb;font-weight:600;width:150px;}
-  .std-cell{color:var(--muted);font-size:11.5px;}
+  th{background:var(--paper);color:var(--ink);font-weight:600;font-size:12px;}
+  .gun-table td:first-child, .gun-table th:first-child{text-align:left;background:var(--paper);font-weight:500;width:150px;}
+  .std-cell{color:var(--muted);font-size:11px;}
   .act-input{width:70px;padding:5px;text-align:center;}
-  .act-input.auto-filled{background:#fff9e8;border-color:#f0d98c;color:#8a6d00;}
+  .act-input.auto-filled{background:var(--warn-tint);border-color:#e3cd91;color:#7a560b;}
   .act-input.auto-filled:focus{background:#fff;}
+
   .grid35{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:6px;margin-top:8px;}
-  .pallet-btn{border:1px solid var(--line);border-radius:7px;padding:7px 4px;text-align:center;cursor:pointer;font-size:11.5px;background:#fbfcfd;user-select:none;}
-  .pallet-btn .num{font-size:10.5px;color:var(--muted);}
-  .pallet-btn .mark{font-size:15px;font-weight:800;}
-  .pallet-btn.ok{background:#eafaf1;border-color:var(--ok);color:var(--ok);}
-  .pallet-btn.ng{background:#fdecea;border-color:var(--fail);color:var(--fail);}
-  .pass{color:var(--ok);font-weight:700;}
-  .fail{color:var(--fail);font-weight:700;background:#fdecea;}
-  .sect-title{font-size:13px;font-weight:700;color:var(--navy);margin:16px 0 8px;}
-  .hint{font-size:11.5px;color:var(--muted);margin-top:6px;}
+  .pallet-btn{border:1px solid var(--line-strong);border-radius:var(--radius-sm);padding:7px 4px;text-align:center;cursor:pointer;font-size:11.5px;background:var(--surface);user-select:none;}
+  .pallet-btn .num{font-size:10.5px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+  .pallet-btn .mark{font-size:15px;font-weight:600;}
+  .pallet-btn.ok{background:var(--ok-tint);border-color:var(--ok);color:var(--ok);}
+  .pallet-btn.ng{background:var(--fail-tint);border-color:var(--fail);color:var(--fail);}
+
+  .pass{color:var(--ok);font-weight:600;}
+  .fail{color:var(--fail);font-weight:600;background:var(--fail-tint);}
+
+  .sect-title{font-size:13px;font-weight:600;color:var(--ink);margin:16px 0 8px;}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5;}
   .empty{color:var(--muted);text-align:center;padding:30px;font-size:13px;}
-  .btn{background:var(--navy);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;}
-  .btn:hover{background:var(--navy2);}
-  .btn.gold{background:var(--gold);color:var(--navy);}
-  .btn.gold:hover{background:var(--gold-l);}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:100;opacity:0;transition:.25s;}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);padding:9px 16px;border-radius:var(--radius-sm);font-family:'Noto Sans Thai',sans-serif;font-weight:600;font-size:13.5px;cursor:pointer;transition:background .12s,border-color .12s;}
+  .btn:hover{background:var(--brand-deep);border-color:var(--brand-deep);}
+  .btn.secondary{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);}
+  .btn.secondary:hover{background:var(--paper);}
+  .btn.danger-outline{background:var(--surface);color:var(--fail);border:1px solid var(--line-strong);}
+  .btn.danger-outline:hover{background:var(--fail-tint);border-color:var(--fail);}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--brand-deep);color:#fff;padding:11px 20px;border-radius:var(--radius-sm);font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:100;opacity:0;transition:.25s;}
   .toast.show{opacity:1;}
-  #setupNotice{font-size:13px;background:#fff6e0;border:1px solid var(--gold);padding:12px 14px;border-radius:9px;margin-bottom:16px;}
-  #setupNotice code{background:#fff;padding:1px 5px;border-radius:4px;}
-  .hist-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:#fbfcfd;cursor:pointer;}
-  .hist-row:hover{border-color:var(--navy2);}
-  .hist-row .meta{font-size:12px;color:var(--muted);margin-top:3px;}
-  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
-  .badge.ok{background:#eafaf1;color:var(--ok);}
-  .badge.draft{background:#fff6e0;color:var(--warn);}
+
+  #setupNotice{font-size:13px;background:var(--warn-tint);border:1px solid #e3cd91;color:#5c4106;padding:12px 14px;border-radius:var(--radius);margin-bottom:16px;line-height:1.5;}
+  #setupNotice code{background:var(--surface);padding:1px 5px;border-radius:3px;}
+
+  .hist-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);margin-bottom:8px;background:var(--surface);cursor:pointer;}
+  .hist-row:hover{border-color:var(--brand);}
+  .hist-row .meta{font-size:12px;color:var(--muted);margin-top:3px;font-family:'IBM Plex Mono',monospace;}
+
+  .badge{display:inline-block;padding:2px 9px;border-radius:var(--radius-sm);font-size:11.5px;font-weight:600;border:1px solid transparent;}
+  .badge.ok{background:var(--ok-tint);color:var(--ok);border-color:#bfe3cd;}
+  .badge.draft{background:var(--warn-tint);color:var(--warn);border-color:#e3cd91;}
 </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>⚙️ Dynamic Inspection Form</h1>
-    <div class="sub">Hybrid Schema — อ่าน config JSON แล้ว render + บันทึกลง Supabase อัตโนมัติ</div>
+    <h1>ระบบบันทึกผลตรวจสอบคุณภาพ</h1>
+    <div class="sub">Dynamic Inspection Form — Hybrid Schema</div>
   </div>
   <div class="sub" id="connStatus">กำลังเชื่อมต่อ...</div>
 </header>
 
-<nav style="display:flex;gap:8px;padding:12px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:10;">
-  <button class="tab-btn active" data-tab="form" onclick="switchTab('form')" style="border:1px solid var(--line);background:var(--navy);color:#fff;padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">📝 กรอกฟอร์ม</button>
-  <button class="tab-btn" data-tab="history" onclick="switchTab('history')" style="border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">📋 ประวัติ / กรอกต่อ</button>
-  <a href="admin.html" style="margin-left:auto;font-size:12.5px;color:var(--muted);text-decoration:none;border:1px solid var(--line);padding:8px 14px;border-radius:8px;">🔧 Admin Panel</a>
+<nav style="display:flex;gap:6px;padding:10px 24px;background:var(--surface);border-bottom:1px solid var(--line-strong);flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:10;">
+  <button class="tab-btn active" data-tab="form" onclick="switchTab('form')" style="border:1px solid var(--line-strong);background:var(--brand);color:#fff;padding:9px 16px;border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;">กรอกฟอร์มตรวจสอบ</button>
+  <button class="tab-btn" data-tab="history" onclick="switchTab('history')" style="border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);padding:9px 16px;border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;">ประวัติการตรวจสอบ</button>
+  <a href="admin.html" style="margin-left:auto;font-size:12.5px;color:var(--muted);text-decoration:none;border:1px solid var(--line-strong);padding:8px 14px;border-radius:var(--radius-sm);">Admin Panel</a>
 </nav>
 
 <main>
 
 <div id="setupNotice">
-  ⚠️ ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์นี้ (บรรทัด script ด้านล่างสุด) ก่อนใช้งานจริงนะคะ ระหว่างนี้ใช้ mock data แสดงตัวอย่างไปก่อน
+  ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์นี้ (บรรทัด script ด้านล่างสุด) ก่อนใช้งานจริง ระหว่างนี้ใช้ mock data แสดงตัวอย่างไปก่อน
 </div>
 
 <!-- ============ TAB: FORM ============ -->
@@ -91,10 +113,10 @@
 
 <div class="card" id="lotStatusBar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
   <div>
-    <span id="lotStatusBadge" class="family-badge" style="background:#fff6e0;color:var(--warn);">🆕 กำลังเปิด Order ใหม่</span>
-    <div class="hint" id="lotStatusHint" style="margin-top:6px;">กรอกข้อมูลแล้วกด "บันทึก" ได้เลย — กลับมากรอกต่อ (Middle/End) ได้ภายหลังจากแท็บ "ประวัติ / กรอกต่อ"</div>
+    <span id="lotStatusBadge" class="family-badge" style="background:var(--warn-tint);color:var(--warn);border-color:#e3cd91;">กำลังเปิด Order ใหม่</span>
+    <div class="hint" id="lotStatusHint" style="margin-top:6px;">กรอกข้อมูลแล้วกดบันทึกได้เลย — กลับมากรอกต่อ (Middle/End) ได้ภายหลังจากแท็บประวัติการตรวจสอบ</div>
   </div>
-  <button class="btn ghost small" style="background:#fff;color:var(--navy);border:1px solid var(--line);padding:6px 10px;font-size:12px;border-radius:8px;cursor:pointer;" onclick="startNewLot()">+ เปิด Order ใหม่</button>
+  <button class="btn secondary" style="padding:7px 14px;font-size:12.5px;" onclick="startNewLot()">+ เปิด Order ใหม่</button>
 </div>
 
 <div class="card">
@@ -119,7 +141,7 @@
 <div id="formArea"></div>
 
 <div class="card" id="saveArea" style="display:flex;justify-content:flex-end;gap:10px">
-  <button class="btn gold" onclick="saveRecord()">💾 บันทึก</button>
+  <button class="btn" onclick="saveRecord()">บันทึก</button>
 </div>
 
 </section>
@@ -190,11 +212,11 @@ const MOCK_MACHINES = [
 ];
 
 const FAMILY_LABEL = {
-  spot_nugget: "🔩 สป๊อต · Nugget Test",
-  spot_torque: "🔩 สป๊อต · Test Torque",
-  weld_length: "🔧 เชื่อม · วัดความยาวแนวเชื่อม",
-  weld_hammer: "🔧 เชื่อม · ค้อนเคาะ + Visual",
-  weld_zeroset: "🔧 เชื่อม · Zero Set Log"
+  spot_nugget: "สป๊อต · Nugget Test",
+  spot_torque: "สป๊อต · Test Torque",
+  weld_length: "เชื่อม · วัดความยาวแนวเชื่อม",
+  weld_hammer: "เชื่อม · ค้อนเคาะ + Visual",
+  weld_zeroset: "เชื่อม · Zero Set Log"
 };
 
 let MACHINES = [];
@@ -207,8 +229,8 @@ function switchTab(tab){
   document.querySelectorAll('.tab-btn').forEach(b=>{
     const active = b.dataset.tab === tab;
     b.classList.toggle('active', active);
-    b.style.background = active ? 'var(--navy)' : '#fff';
-    b.style.color = active ? '#fff' : 'var(--navy)';
+    b.style.background = active ? 'var(--brand)' : 'var(--surface)';
+    b.style.color = active ? '#fff' : 'var(--ink)';
   });
   if(tab==='history') loadHistory();
 }
@@ -217,14 +239,15 @@ function updateLotStatusBadge(status){
   const badge = document.getElementById('lotStatusBadge');
   const hint = document.getElementById('lotStatusHint');
   if(!currentRecordId){
-    badge.className = 'family-badge'; badge.style.background='#fff6e0'; badge.style.color='var(--warn)';
-    badge.textContent = '🆕 กำลังเปิด Order ใหม่';
-    hint.textContent = 'กรอกข้อมูลแล้วกด "บันทึก" ได้เลย — กลับมากรอกต่อ (Middle/End) ได้ภายหลังจากแท็บ "ประวัติ / กรอกต่อ"';
+    badge.className = 'family-badge'; badge.style.background='var(--warn-tint)'; badge.style.color='var(--warn)'; badge.style.borderColor='#e3cd91';
+    badge.textContent = 'กำลังเปิด Order ใหม่';
+    hint.textContent = 'กรอกข้อมูลแล้วกดบันทึกได้เลย — กลับมากรอกต่อ (Middle/End) ได้ภายหลังจากแท็บประวัติการตรวจสอบ';
   } else {
     const submitted = status === 'submitted';
-    badge.style.background = submitted ? '#eafaf1' : '#fff6e0';
+    badge.style.background = submitted ? 'var(--ok-tint)' : 'var(--warn-tint)';
     badge.style.color = submitted ? 'var(--ok)' : 'var(--warn)';
-    badge.textContent = submitted ? `✅ Order #${currentRecordId} — เสร็จสมบูรณ์` : `🔄 Order #${currentRecordId} — กำลังกรอกต่อ`;
+    badge.style.borderColor = submitted ? '#bfe3cd' : '#e3cd91';
+    badge.textContent = submitted ? `Order #${currentRecordId} — เสร็จสมบูรณ์` : `Order #${currentRecordId} — กำลังกรอกต่อ`;
     hint.textContent = 'กำลังแก้ไข/กรอกต่อ Order เดิม — บันทึกจะอัปเดตแถวเดิม ไม่สร้างซ้ำ';
   }
 }
@@ -237,7 +260,7 @@ function startNewLot(){
   document.getElementById('rec_date').value = new Date().toISOString().slice(0,10);
   updateLotStatusBadge();
   if(currentMachine) renderForm();
-  toast('เปิด Order ใหม่แล้วค่ะ');
+  toast('เปิด Order ใหม่แล้ว');
 }
 
 /* ============================================================
@@ -298,7 +321,7 @@ function renderSpotForm(m){
   const threshold = isNugget ? cfg.nugget_threshold_mm : cfg.torque_threshold_kgfcm;
   const metricLabel = isNugget ? `Nugget Diameter (mm) — เกณฑ์ ≥ ${threshold}` : `Test Torque (kgf.cm) — เกณฑ์ ≥ ${threshold}`;
 
-  let html = `<div class="card"><h2>1) เงื่อนไข STD vs ACT</h2><div class="desc">หน่วยเวลา: ${cfg.time_unit} · <span style="background:#fff9e8;border:1px solid #f0d98c;color:#8a6d00;padding:1px 6px;border-radius:5px;">ช่องสีเหลือง = ยังไม่ได้ตรวจ/แก้ (เป็นค่า STD อัตโนมัติ) พิมพ์ทับถ้าค่าจริงต่างจากนี้</span></div>`;
+  let html = `<div class="card"><h2>1) เงื่อนไข STD vs ACT</h2><div class="desc">หน่วยเวลา: ${cfg.time_unit} · <span style="background:var(--warn-tint);border:1px solid #e3cd91;color:#7a560b;padding:1px 6px;border-radius:4px;">ช่องสีเหลือง = ยังไม่ได้ตรวจ/แก้ (เป็นค่า STD อัตโนมัติ) พิมพ์ทับถ้าค่าจริงต่างจากนี้</span></div>`;
   cfg.guns.forEach(gunLabel=>{
     html += `<div class="sect-title">${gunLabel}</div><table class="gun-table"><tr>
       <th>ชุดเงื่อนไข</th><th>Squeeze</th><th>Slope</th><th>Weld</th><th>Hold</th><th>Current</th><th>Pressure</th><th>Tip</th>
@@ -443,7 +466,7 @@ function renderWeldZerosetForm(m){
    ============================================================ */
 async function saveRecord(){
   if(!configured){ toast('โหมดตัวอย่าง — ยังไม่ได้ต่อ Supabase จริง (ดูวิธีตั้งค่าด้านบน)'); return; }
-  if(!currentMachine){ toast('เลือกเครื่องจักรก่อนค่ะ'); return; }
+  if(!currentMachine){ toast('เลือกเครื่องจักรก่อน'); return; }
 
   const savers = {
     spot_nugget: saveSpotRecord,
@@ -550,7 +573,7 @@ async function saveSpotRecord(){
   }
 
   updateLotStatusBadge(status);
-  toast(status==='submitted' ? '✅ บันทึกสำเร็จ — Order นี้ครบ End แล้ว' : '💾 บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
+  toast(status==='submitted' ? 'บันทึกสำเร็จ — Order นี้ครบ End แล้ว' : 'บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
 }
 
 async function saveWeldLengthRecord(){
@@ -585,7 +608,7 @@ async function saveWeldLengthRecord(){
     if(error) return toast('บันทึกไม่สำเร็จ: '+error.message);
   }
   updateLotStatusBadge(status);
-  toast(status==='submitted' ? '✅ บันทึกสำเร็จ — Order นี้ครบ End แล้ว' : '💾 บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
+  toast(status==='submitted' ? 'บันทึกสำเร็จ — Order นี้ครบ End แล้ว' : 'บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
 }
 
 async function saveWeldHammerRecord(){
@@ -614,7 +637,7 @@ async function saveWeldHammerRecord(){
     if(error) return toast('บันทึกไม่สำเร็จ: '+error.message);
   }
   updateLotStatusBadge(status);
-  toast(status==='submitted' ? '✅ บันทึกสำเร็จ — Order นี้ครบ End แล้ว' : '💾 บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
+  toast(status==='submitted' ? 'บันทึกสำเร็จ — Order นี้ครบ End แล้ว' : 'บันทึกสำเร็จ — เปิด Order นี้กรอกต่อได้ภายหลัง');
 }
 
 async function saveWeldZerosetRecord(){
@@ -629,7 +652,7 @@ async function saveWeldZerosetRecord(){
   });
   const {error} = await db.from('weld_zeroset_log').upsert(rows, {onConflict:'machine_id,log_date,time_slot'});
   if(error) return toast('บันทึกไม่สำเร็จ: '+error.message);
-  toast('✅ บันทึกสำเร็จ');
+  toast('บันทึกสำเร็จ');
 }
 
 /* ============================================================
@@ -652,7 +675,7 @@ async function loadHistory(){
         <span class="family-badge">${FAMILY_LABEL[r.machines?.family]||r.machines?.family||''}</span>
         <div class="meta">${r.record_date} · ผู้ตรวจ: ${r.inspector_name||'-'} · กะ: ${r.shift||'-'}</div>
       </div>
-      <span class="badge ${r.status==='submitted'?'ok':'draft'}">${r.status==='submitted'?'✅ เสร็จสมบูรณ์':'🔄 กำลังกรอก'}</span>
+      <span class="badge ${r.status==='submitted'?'ok':'draft'}">${r.status==='submitted'?'เสร็จสมบูรณ์':'กำลังกรอก'}</span>
     </div>`).join('');
 }
 
@@ -681,7 +704,7 @@ async function loadRecordForEdit(recordId){
 
   await populateFormFromRecord(machine.family, recordId);
   switchTab('form');
-  toast('โหลด Order เดิมแล้ว — แก้ไข/กรอกต่อได้เลยค่ะ');
+  toast('โหลด Order เดิมแล้ว — แก้ไข/กรอกต่อได้เลย');
 }
 
 // เติมค่าเดิมกลับเข้าฟอร์มตาม family

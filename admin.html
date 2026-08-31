@@ -5,52 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel | Dynamic Inspection Form</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#0b2540; --navy2:#123a63; --gold:#c9a227; --gold-l:#e8cf7a;
-    --bg:#f3f5f8; --card:#ffffff; --line:#e2e6ec; --text:#1c2733; --muted:#6b7686;
-    --ok:#1e8e5a; --fail:#c0392b; --warn:#b8860b;
+    --ink:#161b20; --muted:#5b6672; --paper:#f3f5f7; --surface:#ffffff;
+    --line:#dbe0e5; --line-strong:#b7c0c9;
+    --brand:#1f4e79; --brand-deep:#153347; --brand-tint:#e8eef3;
+    --ok:#1c7a4b; --ok-tint:#e5f4ec;
+    --fail:#b3261e; --fail-tint:#fbe9e8;
+    --warn:#96660a; --warn-tint:#fbf1dd;
+    --radius:6px; --radius-sm:4px;
   }
   *{box-sizing:border-box;}
-  body{margin:0;font-family:'Noto Sans Thai',sans-serif;background:var(--bg);color:var(--text);}
-  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
-  header h1{font-size:18px;margin:0;font-weight:700;}
-  header .sub{font-size:12px;color:var(--gold-l);margin-top:2px;}
-  header a.back{color:#fff;font-size:12.5px;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:8px 14px;border-radius:8px;}
-  header a.back:hover{background:rgba(255,255,255,.1);}
-  main{max-width:1100px;margin:0 auto;padding:20px;}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
-  .card h2{font-size:16px;margin:0 0 4px;color:var(--navy);border-left:4px solid var(--gold);padding-left:10px;}
-  .card .desc{font-size:12px;color:var(--muted);margin:0 0 14px;padding-left:14px;}
+  body{margin:0;font-family:'Noto Sans Thai',sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  code, .mono, input[type="date"]{font-family:'IBM Plex Mono','Noto Sans Thai',monospace;}
+
+  header{background:var(--brand-deep);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:3px solid var(--brand);}
+  header h1{font-size:17px;margin:0;font-weight:600;}
+  header .sub{font-size:12px;color:#aebfcd;margin-top:3px;}
+  header a.back{color:#fff;font-size:12.5px;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:8px 14px;border-radius:var(--radius-sm);}
+  header a.back:hover{background:rgba(255,255,255,.12);}
+
+  main{max-width:1100px;margin:0 auto;padding:24px;}
+
+  .card{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;}
+  .card h2{font-size:15px;margin:0 0 4px;color:var(--ink);font-weight:600;border-left:3px solid var(--brand);padding-left:10px;}
+  .card .desc{font-size:12px;color:var(--muted);margin:0 0 14px;padding-left:13px;line-height:1.5;}
+
   .grid{display:grid;gap:12px;}
   .grid-3{grid-template-columns:1fr 1fr 1fr;}
   .grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
   @media(max-width:700px){.grid-3,.grid-4{grid-template-columns:1fr;}}
-  label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:600;}
-  select,input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:14px;background:#fbfcfd;}
-  select:focus,input:focus,textarea:focus{outline:none;border-color:var(--navy2);background:#fff;}
-  .family-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#eef2f8;color:var(--navy2);margin-left:8px;vertical-align:middle;}
-  .sect-title{font-size:13px;font-weight:700;color:var(--navy);margin:16px 0 8px;}
-  .hint{font-size:11.5px;color:var(--muted);margin-top:6px;}
+
+  label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:500;}
+  select,input,textarea{width:100%;padding:8px 10px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);font-family:'Noto Sans Thai',sans-serif;font-size:14px;background:var(--surface);color:var(--ink);}
+  select:focus,input:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:-1px;border-color:var(--brand);}
+
+  .family-badge{display:inline-block;padding:2px 9px;border-radius:var(--radius-sm);font-size:11.5px;font-weight:500;background:var(--brand-tint);color:var(--brand-deep);margin-left:8px;vertical-align:middle;border:1px solid var(--line-strong);}
+
+  .sect-title{font-size:13px;font-weight:600;color:var(--ink);margin:16px 0 8px;}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5;}
   .empty{color:var(--muted);text-align:center;padding:30px;font-size:13px;}
-  .btn{background:var(--navy);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;}
-  .btn:hover{background:var(--navy2);}
-  .btn.gold{background:var(--gold);color:var(--navy);}
-  .btn.gold:hover{background:var(--gold-l);}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:9px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:100;opacity:0;transition:.25s;}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);padding:9px 16px;border-radius:var(--radius-sm);font-family:'Noto Sans Thai',sans-serif;font-weight:600;font-size:13.5px;cursor:pointer;transition:background .12s,border-color .12s;}
+  .btn:hover{background:var(--brand-deep);border-color:var(--brand-deep);}
+  .btn.secondary{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);}
+  .btn.secondary:hover{background:var(--paper);}
+  .btn.danger-outline{background:var(--surface);color:var(--fail);border:1px solid var(--line-strong);}
+  .btn.danger-outline:hover{background:var(--fail-tint);border-color:var(--fail);}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--brand-deep);color:#fff;padding:11px 20px;border-radius:var(--radius-sm);font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:100;opacity:0;transition:.25s;}
   .toast.show{opacity:1;}
-  #setupNotice{font-size:13px;background:#fff6e0;border:1px solid var(--gold);padding:12px 14px;border-radius:9px;margin-bottom:16px;}
-  #setupNotice code{background:#fff;padding:1px 5px;border-radius:4px;}
-  .hist-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:#fbfcfd;}
-  .hist-row .meta{font-size:12px;color:var(--muted);margin-top:3px;}
+
+  #setupNotice{font-size:13px;background:var(--warn-tint);border:1px solid #e3cd91;color:#5c4106;padding:12px 14px;border-radius:var(--radius);margin-bottom:16px;line-height:1.5;}
+  #setupNotice code{background:var(--surface);padding:1px 5px;border-radius:3px;}
+
+  .hist-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);margin-bottom:8px;background:var(--surface);}
+  .hist-row .meta{font-size:12px;color:var(--muted);margin-top:3px;font-family:'IBM Plex Mono',monospace;}
 </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>🔧 Admin Panel</h1>
+    <h1>Admin Panel</h1>
     <div class="sub">จัดการเครื่องจักร / Part — เฉพาะผู้ที่ login แล้วเท่านั้น</div>
   </div>
   <a class="back" href="index.html">← กลับไปหน้ากรอกฟอร์ม</a>
@@ -59,18 +77,18 @@
 <main>
 
 <div id="setupNotice">
-  ⚠️ ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์นี้ (บรรทัด script ด้านล่างสุด) ก่อนใช้งานจริงนะคะ
+  ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์นี้ (บรรทัด script ด้านล่างสุด) ก่อนใช้งานจริง
 </div>
 
 <!-- ============ LOGIN GATE — โชว์เมื่อยังไม่ได้ login ============ -->
 <div class="card" id="setupLoginGate">
-  <h2>🔒 สำหรับ Admin เท่านั้น</h2>
+  <h2>สำหรับผู้ดูแลระบบเท่านั้น</h2>
   <div class="desc">หน้านี้ล็อกไว้ ต้อง login ก่อนถึงจะเพิ่ม/แก้ไข/ลบเครื่องจักรได้</div>
   <div class="grid grid-3" style="max-width:520px">
     <div><label>อีเมล Admin</label><input id="admin_email" type="email" placeholder="admin@company.com"></div>
     <div><label>รหัสผ่าน</label><input id="admin_password" type="password" placeholder="••••••••"></div>
     <div style="display:flex;align-items:flex-end;">
-      <button class="btn gold" style="width:100%" onclick="signInAdmin()">🔑 เข้าสู่ระบบ</button>
+      <button class="btn" style="width:100%" onclick="signInAdmin()">เข้าสู่ระบบ</button>
     </div>
   </div>
   <div id="loginError" class="hint" style="color:var(--fail);margin-top:8px;"></div>
@@ -79,8 +97,8 @@
 <!-- ============ SETUP CONTENT — โชว์เมื่อ login แล้ว ============ -->
 <div id="setupContent" style="display:none">
 <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-  <span class="family-badge" style="background:#eafaf1;color:var(--ok);">🔓 Login แล้ว: <span id="adminEmailLabel"></span></span>
-  <button class="btn" style="background:#fff;color:var(--fail);border:1px solid var(--line);padding:6px 12px;font-size:12px;" onclick="signOutAdmin()">ออกจากระบบ</button>
+  <span class="family-badge" style="background:var(--ok-tint);color:var(--ok);border-color:#bfe3cd;">เข้าสู่ระบบแล้ว: <span id="adminEmailLabel"></span></span>
+  <button class="btn danger-outline" style="padding:6px 12px;font-size:12px;" onclick="signOutAdmin()">ออกจากระบบ</button>
 </div>
 
 <div class="card">
@@ -89,11 +107,11 @@
   <div class="grid grid-4">
     <div><label>Family</label>
       <select id="s_family" onchange="loadConfigTemplate()">
-        <option value="spot_nugget">🔩 สป๊อต · Nugget Test</option>
-        <option value="spot_torque">🔩 สป๊อต · Test Torque</option>
-        <option value="weld_length">🔧 เชื่อม · วัดความยาวแนวเชื่อม</option>
-        <option value="weld_hammer">🔧 เชื่อม · ค้อนเคาะ + Visual</option>
-        <option value="weld_zeroset">🔧 เชื่อม · Zero Set Log</option>
+        <option value="spot_nugget">สป๊อต · Nugget Test</option>
+        <option value="spot_torque">สป๊อต · Test Torque</option>
+        <option value="weld_length">เชื่อม · วัดความยาวแนวเชื่อม</option>
+        <option value="weld_hammer">เชื่อม · ค้อนเคาะ + Visual</option>
+        <option value="weld_zeroset">เชื่อม · Zero Set Log</option>
       </select>
     </div>
     <div><label>Customer</label><input id="s_customer" placeholder="ISUZU, IEMT, HATC..."></div>
@@ -114,8 +132,8 @@
   <textarea id="s_config" rows="14" style="width:100%;font-family:'SF Mono',Menlo,monospace;font-size:12.5px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#fbfcfd;"></textarea>
 
   <div style="margin-top:14px;display:flex;gap:10px;">
-    <button class="btn gold" onclick="saveMachine()">💾 บันทึกเครื่องจักร</button>
-    <button class="btn" style="background:#fff;color:var(--navy);border:1px solid var(--line);" onclick="resetSetupForm()">+ เพิ่มเครื่องใหม่ (เคลียร์ฟอร์ม)</button>
+    <button class="btn" onclick="saveMachine()">บันทึกเครื่องจักร</button>
+    <button class="btn secondary" onclick="resetSetupForm()">+ เพิ่มเครื่องใหม่ (เคลียร์ฟอร์ม)</button>
   </div>
 </div>
 
@@ -164,7 +182,7 @@ async function signInAdmin(){
   if(error){ errEl.textContent = 'เข้าสู่ระบบไม่สำเร็จ: '+error.message; return; }
   document.getElementById('admin_password').value = '';
   await refreshAdminUI();
-  toast('🔓 เข้าสู่ระบบสำเร็จ');
+  toast('เข้าสู่ระบบสำเร็จ');
 }
 
 async function signOutAdmin(){
@@ -203,11 +221,11 @@ if(configured){
    3) FAMILY LABELS + CONFIG TEMPLATES
    ============================================================ */
 const FAMILY_LABEL = {
-  spot_nugget: "🔩 สป๊อต · Nugget Test",
-  spot_torque: "🔩 สป๊อต · Test Torque",
-  weld_length: "🔧 เชื่อม · วัดความยาวแนวเชื่อม",
-  weld_hammer: "🔧 เชื่อม · ค้อนเคาะ + Visual",
-  weld_zeroset: "🔧 เชื่อม · Zero Set Log"
+  spot_nugget: "สป๊อต · Nugget Test",
+  spot_torque: "สป๊อต · Test Torque",
+  weld_length: "เชื่อม · วัดความยาวแนวเชื่อม",
+  weld_hammer: "เชื่อม · ค้อนเคาะ + Visual",
+  weld_zeroset: "เชื่อม · Zero Set Log"
 };
 
 // Template เริ่มต้นต่อ family — ให้พี่บีแก้ตัวเลข/label ต่อได้เลย
@@ -292,7 +310,7 @@ async function saveMachine(){
   try{
     config = JSON.parse(document.getElementById('s_config').value);
   }catch(e){
-    toast('❌ Config JSON ผิดรูปแบบ — เช็คเครื่องหมาย , หรือ { } ให้ครบ: '+e.message);
+    toast('Config JSON ผิดรูปแบบ — เช็คเครื่องหมาย , หรือ { } ให้ครบ: '+e.message);
     return;
   }
 
@@ -316,11 +334,11 @@ async function saveMachine(){
   if(editingMachineId){
     const {error} = await db.from('machines').update(payload).eq('id', editingMachineId);
     if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
-    toast('✅ แก้ไขเครื่องจักรสำเร็จ');
+    toast('แก้ไขเครื่องจักรสำเร็จ');
   } else {
     const {error} = await db.from('machines').insert([payload]);
     if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
-    toast('✅ เพิ่มเครื่องจักรใหม่สำเร็จ');
+    toast('เพิ่มเครื่องจักรใหม่สำเร็จ');
   }
   resetSetupForm();
   await loadMachines();
@@ -338,8 +356,8 @@ function renderMachineList(){
         <div class="meta">Part No.: ${m.part_no || '-'} ${m.customer ? ' · ลูกค้า: '+m.customer : ''}</div>
       </div>
       <div style="display:flex;gap:6px;">
-        <button class="btn" style="background:#fff;color:var(--navy);border:1px solid var(--line);padding:6px 10px;font-size:12px;" onclick="editMachine(${m.id})">✏️ แก้ไข</button>
-        <button class="btn" style="background:#fff;color:var(--fail);border:1px solid var(--line);padding:6px 10px;font-size:12px;" onclick="deleteMachine(${m.id})">🗑️ ลบ</button>
+        <button class="btn secondary" style="padding:6px 10px;font-size:12px;" onclick="editMachine(${m.id})">แก้ไข</button>
+        <button class="btn danger-outline" style="padding:6px 10px;font-size:12px;" onclick="deleteMachine(${m.id})">ลบ</button>
       </div>
     </div>`).join('');
 }
@@ -370,7 +388,7 @@ async function deleteMachine(id){
   if(!confirm('ลบเครื่องจักรนี้แน่ใจไหมคะ? (ถ้ามีประวัติการตรวจสอบผูกอยู่ อาจลบไม่ได้เพราะติด foreign key)')) return;
   const {error} = await db.from('machines').delete().eq('id', id);
   if(error){ toast('ลบไม่สำเร็จ: '+error.message); return; }
-  toast('🗑️ ลบเครื่องจักรแล้ว');
+  toast('ลบเครื่องจักรแล้ว');
   if(editingMachineId === id) resetSetupForm();
   await loadMachines();
   renderMachineList();
