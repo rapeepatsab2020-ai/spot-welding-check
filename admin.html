@@ -62,19 +62,80 @@
 
   .hist-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid var(--line-strong);border-radius:var(--radius-sm);margin-bottom:8px;background:var(--surface);}
   .hist-row .meta{font-size:12px;color:var(--muted);margin-top:3px;font-family:'IBM Plex Mono',monospace;}
+
+  /* ============ APP SHELL / SIDEBAR (matches index.html) ============ */
+  .app-shell{display:flex;min-height:100vh;}
+
+  .sidebar{width:230px;flex:0 0 230px;background:var(--brand-deep);color:#dbe4ec;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .sidebar-brand{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.12);}
+  .sidebar-brand .name{font-size:14.5px;font-weight:600;color:#fff;line-height:1.35;}
+  .sidebar-brand .tag{font-size:11px;color:#8fa4b8;margin-top:4px;}
+
+  .sidebar-section{padding:16px 12px 4px;font-size:10.5px;font-weight:600;color:#6f89a0;letter-spacing:.3px;}
+  .sidebar-nav{padding:4px 12px;display:flex;flex-direction:column;gap:2px;}
+  .side-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);color:#c7d5e0;text-decoration:none;font-size:13.5px;font-weight:500;border:1px solid transparent;background:none;cursor:pointer;text-align:left;width:100%;font-family:inherit;}
+  .side-link .ic{width:17px;text-align:center;font-size:14px;flex:0 0 17px;}
+  .side-link:hover{background:rgba(255,255,255,.07);color:#fff;}
+  .side-link.active{background:var(--brand);color:#fff;font-weight:600;}
+
+  .sidebar-foot{margin-top:auto;padding:14px 20px 18px;border-top:1px solid rgba(255,255,255,.12);font-size:11px;color:#6f89a0;line-height:1.5;}
+
+  .main-wrap{flex:1 1 auto;min-width:0;}
+
+  .topbar{background:var(--surface);border-bottom:1px solid var(--line-strong);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:10;}
+  .topbar h1{font-size:16px;margin:0;font-weight:600;color:var(--ink);}
+  .topbar .sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .menu-toggle{display:none;border:1px solid var(--line-strong);background:var(--surface);border-radius:var(--radius-sm);width:36px;height:36px;font-size:16px;cursor:pointer;color:var(--ink);}
+
+  .sidebar-scrim{display:none;}
+
+  @media(max-width:880px){
+    .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:40;transform:translateX(-100%);transition:transform .2s ease;}
+    .sidebar.open{transform:translateX(0);box-shadow:6px 0 24px rgba(0,0,0,.25);}
+    .menu-toggle{display:block;}
+    .sidebar-scrim.show{display:block;position:fixed;inset:0;background:rgba(10,14,18,.45);z-index:30;}
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>Admin Panel</h1>
-    <div class="sub">จัดการเครื่องจักร / Part — เฉพาะผู้ที่ login แล้วเท่านั้น</div>
-  </div>
-  <a class="back" href="index.html">← กลับไปหน้ากรอกฟอร์ม</a>
-</header>
+<div class="app-shell">
 
-<main>
+  <div class="sidebar-scrim" id="sidebarScrim" onclick="closeSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="name">ระบบบันทึกผลตรวจสอบคุณภาพ</div>
+      <div class="tag">Dynamic Inspection Form</div>
+    </div>
+
+    <div class="sidebar-section">ตรวจสอบ</div>
+    <nav class="sidebar-nav">
+      <a class="side-link" href="index.html"><span class="ic">📋</span>กรอกฟอร์มตรวจสอบ</a>
+      <a class="side-link" href="index.html#history"><span class="ic">🕘</span>ประวัติการตรวจสอบ</a>
+    </nav>
+
+    <div class="sidebar-section">จัดการ</div>
+    <nav class="sidebar-nav">
+      <a class="side-link active" href="admin.html"><span class="ic">⚙️</span>Admin Panel</a>
+    </nav>
+
+    <div class="sidebar-foot">จัดการเครื่องจักร / Part<br>เฉพาะผู้ที่ login แล้วเท่านั้น</div>
+  </aside>
+
+  <div class="main-wrap">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="menu-toggle" onclick="openSidebar()" aria-label="เปิดเมนู">☰</button>
+        <div>
+          <h1>Admin Panel</h1>
+          <div class="sub">จัดการเครื่องจักร / Part</div>
+        </div>
+      </div>
+    </div>
+
+    <main>
 
 <div id="setupNotice">
   ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์นี้ (บรรทัด script ด้านล่างสุด) ก่อนใช้งานจริง
@@ -143,7 +204,9 @@
 </div>
 </div>
 
-</main>
+    </main>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -166,6 +229,16 @@ function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ---------- SIDEBAR (mobile) ---------- */
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarScrim').classList.add('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarScrim').classList.remove('show');
 }
 
 /* ============================================================
