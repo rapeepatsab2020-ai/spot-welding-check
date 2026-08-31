@@ -161,7 +161,7 @@
     <main>
 
 <div id="setupNotice">
-  ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์นี้ (บรรทัด script ด้านล่างสุด) ก่อนใช้งานจริง ระหว่างนี้ใช้ mock data แสดงตัวอย่างไปก่อน
+  ยังไม่ได้ตั้งค่า Supabase — ใส่ <code>SUPABASE_URL</code> และ <code>SUPABASE_KEY</code> ในไฟล์ <code>config.js</code> (copy จาก <code>config.example.js</code>) ก่อนใช้งานจริง ระหว่างนี้ใช้ mock data แสดงตัวอย่างไปก่อน
 </div>
 
 <!-- ============ TAB: FORM ============ -->
@@ -217,15 +217,15 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="config.js"></script>
 <script>
 /* ============================================================
-   1) SUPABASE SETUP — ใส่ค่าจริงตรงนี้
+   1) SUPABASE SETUP — ค่า SUPABASE_URL / SUPABASE_KEY มาจาก config.js
+      (แก้ค่าจริงได้ที่ config.js — ไฟล์นั้นไม่ถูก commit ขึ้น GitHub)
    ============================================================ */
-const SUPABASE_URL = 'https://rbydsetkjvvqbcrmpbli.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieWRzZXRranZ2cWJjcm1wYmxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwMjA2NzcsImV4cCI6MjEwMjU5NjY3N30.plBFA5rVas_BlsLXmn0n8SH1EfN28wKq3iORGNxddrk';
 let db = null, configured = false;
 try{
-  if(SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_KEY !== 'YOUR_SUPABASE_ANON_KEY'){
+  if(typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_KEY !== 'YOUR_SUPABASE_ANON_KEY'){
     db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     configured = true;
     document.getElementById('setupNotice').style.display='none';
