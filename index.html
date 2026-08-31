@@ -135,6 +135,28 @@
 
 <!-- ============ TAB: SETUP ============ -->
 <section id="tab-setup" style="display:none">
+
+  <!-- ============ LOGIN GATE — โชว์เมื่อยังไม่ได้ login ============ -->
+  <div class="card" id="setupLoginGate">
+    <h2>🔒 สำหรับ Admin เท่านั้น</h2>
+    <div class="desc">หน้านี้ล็อกไว้ ต้อง login ก่อนถึงจะเพิ่ม/แก้ไข/ลบเครื่องจักรได้ (ป้องกันพนักงานหน้างานเผลอกดโดยไม่ตั้งใจ)</div>
+    <div class="grid grid-3" style="max-width:520px">
+      <div><label>อีเมล Admin</label><input id="admin_email" type="email" placeholder="admin@company.com"></div>
+      <div><label>รหัสผ่าน</label><input id="admin_password" type="password" placeholder="••••••••"></div>
+      <div style="display:flex;align-items:flex-end;">
+        <button class="btn gold" style="width:100%" onclick="signInAdmin()">🔑 เข้าสู่ระบบ</button>
+      </div>
+    </div>
+    <div id="loginError" class="hint" style="color:var(--fail);margin-top:8px;"></div>
+  </div>
+
+  <!-- ============ SETUP CONTENT — โชว์เมื่อ login แล้ว ============ -->
+  <div id="setupContent" style="display:none">
+  <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <span class="family-badge" style="background:#eafaf1;color:var(--ok);">🔓 Login แล้ว: <span id="adminEmailLabel"></span></span>
+    <button class="btn" style="background:#fff;color:var(--fail);border:1px solid var(--line);padding:6px 12px;font-size:12px;" onclick="signOutAdmin()">ออกจากระบบ</button>
+  </div>
+
   <div class="card">
     <h2 id="setupFormTitle">เพิ่มเครื่องจักร / Part ใหม่</h2>
     <div class="desc">เลือก family ก่อน ระบบจะดึง config JSON ตัวอย่างมาให้แก้ได้เลย — ไม่ต้องเขียนเองตั้งแต่ต้น</div>
@@ -175,6 +197,7 @@
     <h2>รายการเครื่องจักรทั้งหมด</h2>
     <div id="machineList" class="empty">กำลังโหลด...</div>
   </div>
+  </div>
 </section>
 
 </main>
@@ -198,6 +221,51 @@ try{
     document.getElementById('connStatus').textContent = '🟡 โหมดตัวอย่าง (mock data)';
   }
 }catch(e){ document.getElementById('connStatus').textContent = '🔴 เชื่อมต่อไม่สำเร็จ'; }
+
+/* ============================================================
+   1.5) ADMIN AUTH — คุมสิทธิ์เข้าหน้า Setup ด้วย Supabase Auth
+   ============================================================ */
+async function signInAdmin(){
+  if(!configured){ toast('โหมดตัวอย่าง — ยังไม่ได้ต่อ Supabase จริง'); return; }
+  const email = document.getElementById('admin_email').value.trim();
+  const password = document.getElementById('admin_password').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'กรอกอีเมลและรหัสผ่านก่อนค่ะ'; return; }
+  const {error} = await db.auth.signInWithPassword({email, password});
+  if(error){ errEl.textContent = 'เข้าสู่ระบบไม่สำเร็จ: '+error.message; return; }
+  document.getElementById('admin_password').value = '';
+  await refreshAdminUI();
+  toast('🔓 เข้าสู่ระบบสำเร็จ');
+}
+
+async function signOutAdmin(){
+  if(!configured) return;
+  await db.auth.signOut();
+  await refreshAdminUI();
+  toast('ออกจากระบบแล้ว');
+}
+
+// เช็คสถานะ login แล้วสลับโชว์ login gate หรือ setup content ให้ตรงกัน
+async function refreshAdminUI(){
+  if(!configured){
+    // โหมดตัวอย่าง ไม่มี Supabase จริง — เปิดให้ดู setup content ได้เลยเพื่อพรีวิว
+    document.getElementById('setupLoginGate').style.display = 'none';
+    document.getElementById('setupContent').style.display = 'block';
+    renderMachineList();
+    return;
+  }
+  const {data:{session}} = await db.auth.getSession();
+  if(session){
+    document.getElementById('setupLoginGate').style.display = 'none';
+    document.getElementById('setupContent').style.display = 'block';
+    document.getElementById('adminEmailLabel').textContent = session.user.email;
+    renderMachineList();
+  } else {
+    document.getElementById('setupLoginGate').style.display = 'block';
+    document.getElementById('setupContent').style.display = 'none';
+  }
+}
 
 function toast(msg){
   const t = document.getElementById('toast');
@@ -301,7 +369,7 @@ function switchTab(tab){
     b.style.color = active ? '#fff' : 'var(--navy)';
   });
   if(tab==='history') loadHistory();
-  if(tab==='setup') renderMachineList();
+  if(tab==='setup') refreshAdminUI();
 }
 
 function updateLotStatusBadge(status){
